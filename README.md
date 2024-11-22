@@ -36,6 +36,7 @@ Credits: [cube0x0/KrbRelay](https://github.com/cube0x0/KrbRelay)
     - Having zones where unsecured DNS updates are allowed in Active Directory domains ==> This means that anonymous users with network access could potentially take over the domain!!!
     - Gaining control over HOSTS file entries on client computers.
   - Background consoles are ideal for managing multiple SMB consoles
+  - Similar tools https://github.com/almandin/krbjack
 ## Usage
 
 ```
