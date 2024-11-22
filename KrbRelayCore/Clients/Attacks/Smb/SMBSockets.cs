@@ -62,7 +62,7 @@ class SMBCommandSocketConsole
                 //smbc.currDestSocket = state.TargetSocket;
                 //smbc.ServerType = State.ServerType;
                 smbc.curSocketServer = currSocketServer;
-                bool isConnected = smbc.Connect(Program.targetFQDN, SMBTransportType.DirectTCPTransport);
+                bool isConnected = smbc.Connect(Program.RedirectHost, SMBTransportType.DirectTCPTransport);
                 if (!isConnected)
                 {
                     Console.WriteLine("[-] Could not connect to {0}:445", Program.targetFQDN);
@@ -319,7 +319,7 @@ public class FakeSMBServer
                             smbc.currDestSocket = state.TargetSocket;
                             smbc.ServerType = ServerType;
                             smbc.curSocketServer = this;
-                            bool isConnected = smbc.Connect(Program.targetFQDN, SMBTransportType.DirectTCPTransport);
+                            bool isConnected = smbc.Connect(Program.RedirectHost, SMBTransportType.DirectTCPTransport);
                             if (!isConnected)
                             {
                                 Console.WriteLine("[-] Could not connect to {0}:445", Program.targetFQDN);
