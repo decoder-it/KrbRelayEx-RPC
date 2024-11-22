@@ -39,23 +39,9 @@ namespace KrbRelay
     internal class Program
     {
 
-        [StructLayout(LayoutKind.Sequential)]
-        public struct SEC_WINNT_AUTH_IDENTITY
-        {
-            public IntPtr User;
-            public int UserLength;
-            public IntPtr Domain;
-            public int DomainLength;
-            public IntPtr Password;
-            public int PasswordLength;
-            public int Flags;
-        }
 
         public static string DcomHost = "";
         public static string RedirectHost = "";
-        public static string Username = "";
-        public static string Password = "";
-        public static string Domain = "";
         public static string FakeSPN = "";
         public static int SmbListenerPort = 445;
         public static int DcomListenerPort = 9999;
@@ -67,16 +53,15 @@ namespace KrbRelay
         public static byte[] CallID = new byte[4];
         //public static TcpForwarder tcpFwd = new TcpForwarder();
         public static FakeSMBServer SMBtcpFwd;
-        public static FakeSMBServer DCOMtcpFwd;
-        public static FakeSMBServer[] tcpFwdorwarders;
+        //public static FakeSMBServer[] tcpFwdorwarders;
         public static Socket currSourceSocket { get; set; }
         public static Socket currDestSocket { get; set; }
         //public static bool relayed = false;
         public static bool forwdardmode = false;
 
-        public static int numClientConnect = 0;
+        //public static int numClientConnect = 0;
         public static byte[] apreqBuffer;
-        public static NetworkStream stream;
+        //public static NetworkStream stream;
         public static bool bgconsole = false;
         public static int bgconsoleStartPort = 10000;
 
@@ -85,18 +70,12 @@ namespace KrbRelay
             // SMB2 Header is usually 64 bytes
             int smb2HeaderLength = 64;
 
-            // Session Setup Request starts after SMB2 Header
             int securityBufferOffsetPosition = smb2HeaderLength + 12;  // SecurityBufferOffset at byte 12 after header
             int securityBufferLengthPosition = smb2HeaderLength + 14;  // SecurityBufferLength at byte 14 after header
-
-            // Read the Security Buffer Offset (2 bytes at offset position)
             int securityBufferOffset = BitConverter.ToUInt16(sessionSetupRequest, securityBufferOffsetPosition);
 
-            // Read the Security Buffer Length (2 bytes at length position)
             int securityBufferLength = BitConverter.ToUInt16(sessionSetupRequest, securityBufferLengthPosition);
-
-            // Now extract the Security Blob using the offset and length
-            byte[] securityBlob = new byte[securityBufferLength];
+byte[] securityBlob = new byte[securityBufferLength];
             Array.Copy(sessionSetupRequest, securityBufferOffset, securityBlob, 0, securityBufferLength);
 
             return securityBlob;

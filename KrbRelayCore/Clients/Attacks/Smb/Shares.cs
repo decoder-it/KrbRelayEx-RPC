@@ -591,10 +591,7 @@ namespace KrbRelay.Clients.Attacks.Smb
                                 listDir(fileStore, arg1);
                                 break;
 
-                            case "!l":
-                                Program.SMBtcpFwd.ListConnectedClients();
-                                break;
-
+                            
 
                             case "get":
                                 readFile(smbClient, fileStore, arg1, out byte[] file);
