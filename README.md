@@ -20,12 +20,10 @@ Credits: [cube0x0/KrbRelay](https://github.com/cube0x0/KrbRelay)
 ## Features
 
 - Relay Kerberos AP-REQ tickets to access SMB shares or HTTP ADCS endpoints.
-- Interactive or background SMB consoles for managing multiple connections.
-- Supports dumping SAM & LSA secrets.
+- Interactive or background multithreaded SMB consoles for managing multiple connections.
+- Multithreaded port forwarding to support other protocols.
 - Transparent relaying process for seamless user access.
-- Flexible attack configurations with support for SSL and port redirection.
-
----
+- Runs onw Winodws and GNU/Linux with Dotnet 8.0 sdk
 
 ## Usage
 
