@@ -490,10 +490,6 @@ byte[] securityBlob = new byte[securityBufferLength];
                     case "/RELAYEDUSERDOMAIN":
                         relayedUserDomain = args[entry.index + 1];
                         break;
-                    case "-SESSION":
-                    case "/SESSION":
-                        sessionID = Int32.Parse(args[entry.index + 1]);
-                        break;
                 }
             }
 
@@ -508,13 +504,6 @@ byte[] securityBlob = new byte[securityBufferLength];
                 Console.WriteLine("KrbRelayEx.exe -h for help");
                 return;
             }
-
-            /*if (string.IsNullOrEmpty(clsid))
-            {
-                Console.WriteLine("Missing /clsid: parameter");
-                Console.WriteLine("KrbRelay.exe -h for help");
-                return;
-            }*/
 
             if (!string.IsNullOrEmpty(spn))
             {
@@ -555,19 +544,6 @@ byte[] securityBlob = new byte[securityBufferLength];
             else
                 pPrincipalName = FakeSPN;
 
-            if (service == "cifs")
-            {
-                //bool isConnected = smbClient.Connect(targetFQDN, SMBTransportType.DirectTCPTransport);
-                //if (!isConnected)
-                //{
-                //                  Console.WriteLine("[-] Could not connect to {0}:445", targetFQDN);
-                //               return;
-                //            }
-                //Smb.Connect();
-
-                //Console.WriteLine("smc conn done");
-                //Console.ReadKey();
-            }
             if (service == "http")
             {
                 if (!attacks.Keys.Contains("endpoint") || string.IsNullOrEmpty(attacks["endpoint"]))
@@ -613,40 +589,19 @@ byte[] securityBlob = new byte[securityBufferLength];
                 }
             }
 
-            /*
-                      TCP    0.0.0.0:135            0.0.0.0:0              LISTENING
-            TCP    0.0.0.0:445            0.0.0.0:0              LISTENING
-            TCP    0.0.0.0:3389           0.0.0.0:0              LISTENING
-            TCP    0.0.0.0:5357           0.0.0.0:0              LISTENING
-            TCP    0.0.0.0:5985           0.0.0.0:0              LISTENING
-            TCP    0.0.0.0:47001          0.0.0.0:0              LISTENING
-            TCP    0.0.0.0:49664          0.0.0.0:0              LISTENING
-            TCP    0.0.0.0:49665          0.0.0.0:0              LISTENING
-            TCP    0.0.0.0:49666          0.0.0.0:0              LISTENING
-            TCP    0.0.0.0:49667          0.0.0.0:0              LISTENING
-            TCP    0.0.0.0:49668          0.0.0.0:0              LISTENING
-            TCP    0.0.0.0:49669          0.0.0.0:0              LISTENING
-            TCP    0.0.0.0:49670          0.0.0.0:0              LISTENING
-            TCP    0.0.0.0:49671          0.0.0.0:0              LISTENING
-            TCP    0.0.0.0:49672          0.0.0.0:0              LISTENING
-            TCP    0.0.0.0:52557          0.0.0.0:0
-            */
-            Console.WriteLine("*** KrbRelayEx ***");
-            Console.WriteLine("v0.1 by @decoder_it");
-            Console.WriteLine("Gitub decoder-it\r\n" );
-
+          
+            Console.WriteLine("[*] KrbRelayEx started");
+            
 
             Console.WriteLine("[*] Hit 'q' for quit, 'r' for restarting Relaying and Port Forwarding, 'l' for listing connected clients");
             
             while (true)
             {
-                //StartListener().Wait();
-                //Console.WriteLine("Returned");
-                //tcpFwd.Stop();
+                
                 if (Console.KeyAvailable)
                 {
-                    // Read the key without blocking
-                    ConsoleKeyInfo key = Console.ReadKey(intercept: true); // 'true' prevents the key from appearing in the console
+                    
+                    ConsoleKeyInfo key = Console.ReadKey(intercept: true); 
                     if (key.KeyChar == 'q')
                         return;
 
@@ -655,13 +610,7 @@ byte[] securityBlob = new byte[securityBufferLength];
                         SMBtcpFwd.ListConnectedClients();
 
                     }
-                    /*if (key.KeyChar == 's')
-                    {
-                        relayed = !relayed;
-                        Console.WriteLine(!relayed ? "[*] Relay is active" : "[*] Relay is inactive");
-
-                    }*/
-
+            
                     if (key.KeyChar == 'r')
                     {
                         Console.WriteLine("[!] Restarting Relay...");
@@ -673,9 +622,7 @@ byte[] securityBlob = new byte[securityBufferLength];
                     }
                     else
                     {
-                        // Sleep for a short duration
-                        //Console.WriteLine("No key pressed. Sleeping...");
-                        Thread.Sleep(500); // Sleep for 1 second
+                        Thread.Sleep(500); 
                     }
                 }
             }
