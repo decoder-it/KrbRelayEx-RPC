@@ -33,7 +33,7 @@ Credits: [cube0x0/KrbRelay](https://github.com/cube0x0/KrbRelay)
 
   - This tool is particularly effective if you can manipulate DNS names. Examples include:
     - Being a member of the DNS Admins group.
-    - Having zones where unsecured DNS updates are allowed in Active Directory domains.
+    - Having zones where unsecured DNS updates are allowed in Active Directory domains ==> This means that anonymous users with network access could potentially take over the domain!!!
     - Gaining control over HOSTS file entries on client computers.
   - Background consoles are ideal for managing multiple SMB consoles
 ## Usage
