@@ -1,0 +1,107 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <Optimize>false</Optimize>
+    <DefineConstants>
+    </DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup>
+    <NoWin32Manifest>true</NoWin32Manifest>
+    <AssemblyTitle>KrbRelay</AssemblyTitle>
+    <Company>Cube0x0</Company>
+    <Product>KrbRelay</Product>
+    <Copyright>Copyright © Cube0x0 2021</Copyright>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <OutputPath>bin\x86\Debug\</OutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <OutputPath>bin\x86\Release\</OutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <OutputPath>bin\x64\Debug\</OutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <OutputPath>bin\x64\Release\</OutputPath>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="Clients\Attacks\Ldap\**" />
+    <EmbeddedResource Remove="Clients\Attacks\Ldap\**" />
+    <None Remove="Clients\Attacks\Ldap\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <COMReference Include="NetFwTypeLib">
+      <Guid>{58FBCF7C-E7A9-467C-80B3-FC65E8FCCA08}</Guid>
+      <VersionMajor>1</VersionMajor>
+      <VersionMinor>0</VersionMinor>
+      <Lcid>0</Lcid>
+      <WrapperTool>tlbimp</WrapperTool>
+      <Isolated>False</Isolated>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </COMReference>
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Connected Services\" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="BouncyCastle.NetCore" Version="2.2.1" />
+    <PackageReference Include="dnMerge" Version="0.5.15" />
+    <PackageReference Include="ILMerge" Version="3.0.41" />
+    <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
+    <PackageReference Include="MimeKitLite" Version="4.8.0" />
+    <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
+    <PackageReference Include="System.DirectoryServices" Version="9.0.0" />
+    <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="6.1.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="Com\BufferUtils.cs" />
+    <Compile Remove="Com\COMInterfaces.cs" />
+    <Compile Remove="Com\COMObjRef.cs" />
+    <Compile Remove="Com\COMUtilities.cs" />
+    <Compile Remove="Com\ComUtils.cs" />
+    <Compile Remove="Com\SafeBufferGeneric.cs" />
+    <Compile Remove="Com\SafeHGlobalBuffer.cs" />
+    <Compile Remove="Com\SafeStructureInOutBuffer.cs" />
+    <Compile Remove="IStorage\IEnumSTATSTG.cs" />
+    <Compile Remove="IStorage\ILockBytes.cs" />
+    <Compile Remove="IStorage\IMarshal.cs" />
+    <Compile Remove="IStorage\IStorage.cs" />
+    <Compile Remove="IStorage\IStream.cs" />
+    <Compile Remove="IStorage\Ole32.cs" />
+    <Compile Remove="IStorage\StandardActivator.cs" />
+    <Compile Remove="IStorage\StorageTrigger.cs" />
+    <Compile Remove="Smb\RPCForSMBLibrary\Services\SamrService\Enums\AccessMask.cs" />
+    <Compile Remove="Spoofing\HttpServer.cs" />
+    <Compile Remove="Spoofing\LLMNR.cs" />
+    <Compile Remove="Spoofing\UDP.cs" />
+    <Compile Remove="Spoofing\Util.cs" />
+  </ItemGroup>
+</Project>
