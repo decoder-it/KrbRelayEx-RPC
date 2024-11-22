@@ -25,6 +25,17 @@ Credits: [cube0x0/KrbRelay](https://github.com/cube0x0/KrbRelay)
 - Transparent relaying process for seamless user access.
 - Runs onw Winodws and GNU/Linux with Dotnet 8.0 sdk
 
+## Notes
+
+  - KrbRelayEx intercepts and relays the first authentication attempt,
+    then switches to forwarder mode for all subsequent incoming requests.
+    You can press any time 'r' for restarting relay mode
+
+  - This tool is particularly effective if you can manipulate DNS names. Examples include:
+    - Being a member of the DNS Admins group.
+    - Having zones where unsecured DNS updates are allowed in Active Directory domains.
+    - Gaining control over HOSTS file entries on client computers.
+  - Background consoles are ideal for managing multiple SMB consoles
 ## Usage
 
 ```
@@ -80,14 +91,3 @@ Examples:
   Relay attacks with SSL and port forwarding:
     KrbRelay.exe -spn HTTP/target.domain.com -ssl -redirectserver 192.168.1.50 -redirectports 3389,5985
 
-Notes:
-  - KrbRelayEx intercepts and relays the first authentication attempt,
-    then switches to forwarder mode for all subsequent incoming requests.
-    You can press any time 'r' for restarting relay mode
-
-  - This tool is particularly effective if you can manipulate DNS names. Examples include:
-    - Being a member of the DNS Admins group.
-    - Having zones where unsecured DNS updates are allowed in Active Directory domains.
-    - Gaining control over HOSTS file entries on client computers.
-
-  - Background consoles are ideal for managing multiple SMB consoles
