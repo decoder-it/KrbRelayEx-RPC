@@ -216,12 +216,12 @@ byte[] securityBlob = new byte[securityBufferLength];
         private static void ShowHelp()
         {
 
-            C
+            
             Console.WriteLine("\t#############      KrbRelayEx by @decoder_it     ##############");
             Console.WriteLine("\t# Kerberos Relay and Forwarder for (Fake) SMB MiTM Server     #");
             Console.WriteLine("\t# v1.0 2024                                                   #");
             Console.WriteLine("\t# Github: https://github.com/decoder-it/KrbRelayEx            #");
-            Console.WriteLine("\t# Credits:   https://github.com/cube0x0/KrbRelay              #");
+            Console.WriteLine("\t# Credits: https://github.com/cube0x0/KrbRelay                #");
             Console.WriteLine("\t###############################################################");
 
 
