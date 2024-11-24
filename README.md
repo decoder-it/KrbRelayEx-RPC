@@ -145,7 +145,11 @@ Finally, we ge a client authentication certificate on behalf the Administrator:<
 <img width="922" alt="image" src="https://github.com/user-attachments/assets/4a5795dc-4061-483e-be98-81ab5b89ef8e">
 <br><br>
 <br><br>
-
+Or we could install a malicious service and get a shell running as SYSTEM
+<br><br>
+![image](https://github.com/user-attachments/assets/c607ad8f-1feb-44e1-a22b-613377d7018d)
+<br><br>
+On an ADCS server this would allow the backup of the the CA's private/public key enabling the forging of certificates on behalf of any user.
 # Acknowledgements
 Project Zero :
 
