@@ -8,7 +8,7 @@ Kerberos Relay and Forwarder for (Fake) SMB MiTM Server
 ## Why this tool
 I developed this tool to explore and understand the offensive capabilities of the DNSAdmins group in Active Directory, specifically their ability to modify DNS records. While DNSAdmins are recognized as privileged users, there has been limited documentation (beyond CVE-2021-40469) on how these privileges can be exploited. It's worth noting that manipulating DNS entries is not exclusive to DNSAdmins. Scenarios like DNS zones with insecure updates enabled (a surprisingly common misconfiguration!) or controlling HOSTS file entries on client machines can also enable such attacks.
 
-The primary goal of this project was to test whether a Man-in-the-Middle (MitM) attack—leveraging DNS spoofing, forwarding, and Kerberos relaying—could be executed and abused effectively. 
+The primary goal of this project was to test whether a Man-in-the-Middle (MitM) attack, leveraging DNS spoofing, forwarding, and Kerberos relaying, could be executed and abused effectively. 
 Building upon this concept, I developed this tool, starting from [KrbRelay](https://github.com/cube0x0/KrbRelay), and implemented it in .NET 8.0 to ensure compatibility across both Windows and GNU/Linux platforms. 
 
 ## Overview
