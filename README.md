@@ -7,11 +7,11 @@ Created by [@decoder_it](https://github.com/decoder-it)
 ---
 
 ## Why this tool
-I created this tool to explore and understand the offensive capabilities of DNSAdmins  group in Active Directory who can modify DNS records. While they are considered privileged users, there has been a lack of detailed explanations (apart CVE-2021-40469) on how this privilege could be abused.
-It's important to note that manipulating DNS entries is not limited to DNS Admins. There are other scenarios where this might be possible, such as having DNS Zones with insecure updates enabled (yes, this is not that uncommon!!) or gaining control over HOSTS file entries on client computers.<br>
-My goal was to test whether a Man-in-the-Middle (MitM) attack involving forwarding and **Kerberos** relaying could be successfully executed and abused after creating a spoofed DNS entry.
-During my investigation, I discovered an existing tool, [krbjack](https://github.com/almandin/krbjack), which performs a similar attack by exploiting the *Insecure DNS Updates* flag. However, it was somewhat limited in scope.<br>
-I developed this tool, starting from  [KrbRelay](https://github.com/cube0x0/KrbRelay), using .NET 8.0, making it compatible with both Windows and GNU/Linux platforms.
+I developed this tool to explore and understand the offensive capabilities of the DNSAdmins group in Active Directory, specifically their ability to modify DNS records. While DNSAdmins are recognized as privileged users, there has been limited documentation (beyond CVE-2021-40469) on how these privileges can be exploited. It's worth noting that manipulating DNS entries is not exclusive to DNSAdmins. Scenarios like DNS zones with insecure updates enabled (a surprisingly common misconfiguration!) or controlling HOSTS file entries on client machines can also enable such attacks.
+
+The primary goal of this project was to test whether a Man-in-the-Middle (MitM) attack—leveraging DNS spoofing, forwarding, and Kerberos relaying—could be executed and abused effectively. During my research, I discovered an existing tool, [krbjack](https://github.com/almandin/krbjack), which exploits the Insecure DNS Updates flag for a similar attack. However, its scope was somewhat limited.
+Building upon this concept, I developed this tool, starting from [KrbRelay](https://github.com/cube0x0/KrbRelay), and implemented it in .NET 8.0 to ensure compatibility across both Windows and GNU/Linux platforms.
+
 ## Overview
 
 **KrbRelayEx** is a tool designed for performing Man-in-the-Middle (MitM) attacks by relaying Kerberos AP-REQ tickets. It listens for incoming SMB connections and forwards the AP-REQ to the target host, enabling access to SMB shares or HTTP AD CS (Active Directory Certificate Services) endpoints on behalf the targeted identity.  
