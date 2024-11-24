@@ -97,6 +97,34 @@ Examples:
   Relay attacks with SSL and port forwarding:
     KrbRelay.exe -spn HTTP/target.domain.com -ssl -redirectserver  <ip_target_host> -redirectports 3389,5985,135,443,80
 ```
+# Examples
+The user19 account is a member of the DNSAdmins group in the MYLAB.LOCAL domain and modifies the A record for SRV2-MYLAB. The IP 192.168.212.11 is our attacker machine.
+In this case, we use the dnstool.py script from from https://github.com/dirkjanm/krbrelayx<br><br>
+<img width="827" alt="image" src="https://github.com/user-attachments/assets/d66e4b5d-e1c6-472c-8b40-8951d969df3a">
+<br><br>
+On the attacker machine, we launch the relay/forwarder tool. SMB consoles will be launched in the background, starting from port 10000, and we will forward all traffic for WinRM, RPC Mapper, and Remote Desktop:<br><br>
+<img width="818" alt="image" src="https://github.com/user-attachments/assets/93a31581-bd34-4d0a-8a4f-41d9bad95b2b">
+<br><br>
+A Domain Admin accesess the \\SRV2-MYLAB\c$ share without suspecting anything:
+<br><br>
+<img width="851" alt="image" src="https://github.com/user-attachments/assets/052199fc-c0ba-4505-9125-90b5b2763f16">
+
+<br><br>
+We intercept, relay, and forward the authenticated call:<br><br>
+<img width="814" alt="image" src="https://github.com/user-attachments/assets/8413f774-0bb4-4cbc-998e-3581b546717e">
+<br><br>
+Finally, we gain access to the share with privileged permissions:
+<br><br>
+![image](https://github.com/user-attachments/assets/f08aa61c-0657-40c1-924f-753aebb8872b)
+
+<br><br>
+From here, we can:
+
+- Write to protected locations with Domain Admin privileges.
+- Create and start services that run under the LOCAL SYSTEM context.
+ - And much more... 😉
+
+
 # Acknowledgements
 Project Zero :
 
