@@ -2,15 +2,14 @@
 
 ![Version](https://img.shields.io/badge/version-1.0-blue)  
 Kerberos Relay and Forwarder for (Fake) SMB MiTM Server  
-Created by [@decoder_it](https://github.com/decoder-it)
 
 ---
 
 ## Why this tool
 I developed this tool to explore and understand the offensive capabilities of the DNSAdmins group in Active Directory, specifically their ability to modify DNS records. While DNSAdmins are recognized as privileged users, there has been limited documentation (beyond CVE-2021-40469) on how these privileges can be exploited. It's worth noting that manipulating DNS entries is not exclusive to DNSAdmins. Scenarios like DNS zones with insecure updates enabled (a surprisingly common misconfiguration!) or controlling HOSTS file entries on client machines can also enable such attacks.
 
-The primary goal of this project was to test whether a Man-in-the-Middle (MitM) attack—leveraging DNS spoofing, forwarding, and Kerberos relaying—could be executed and abused effectively. During my research, I discovered an existing tool, [krbjack](https://github.com/almandin/krbjack), which exploits the Insecure DNS Updates flag for a similar attack. However, its scope was somewhat limited.
-Building upon this concept, I developed this tool, starting from [KrbRelay](https://github.com/cube0x0/KrbRelay), and implemented it in .NET 8.0 to ensure compatibility across both Windows and GNU/Linux platforms.
+The primary goal of this project was to test whether a Man-in-the-Middle (MitM) attack—leveraging DNS spoofing, forwarding, and Kerberos relaying—could be executed and abused effectively. 
+Building upon this concept, I developed this tool, starting from [KrbRelay](https://github.com/cube0x0/KrbRelay), and implemented it in .NET 8.0 to ensure compatibility across both Windows and GNU/Linux platforms. 
 
 ## Overview
 
@@ -152,13 +151,11 @@ Or we could install a malicious service and get a shell running as SYSTEM
 
 <br><br>
 On an ADCS server this would allow the backup of the the CA's private/public key enabling the forging of certificates on behalf of any user.
+# Notes
+A similar tool can be found here https://github.com/almandin/krbjack
 # Acknowledgements
-Project Zero :
 
-https://googleprojectzero.blogspot.com/2021/10/using-kerberos-for-authentication-relay.html
-https://googleprojectzero.blogspot.com/2021/10/windows-exploitation-tricks-relaying.html
+[Using Kerberos for Authentication Relay Attacks](https://googleprojectzero.blogspot.com/2021/10/using-kerberos-for-authentication-relay.html)
+<br>
+[Using MITM to Attack Active Directory Authentication Schemes](https://media.defcon.org/DEF%20CON%2029/DEF%20CON%2029%20presentations/Sagi%20Sheinfeld%20Eyal%20Karni%20Yaron%20Zinar%20-%20Using%20Machine-in-the-Middle%20to%20Attack%20Active%20Directory%20Authentication%20Schemes.pdf)
 
-KrbRelay:
-
-
-https://github.com/cube0x0/KrbRelay
