@@ -9,7 +9,7 @@ Created by [@decoder_it](https://github.com/decoder-it)
 ## Why this tool
 I created this tool to explore and understand the offensive capabilities of DNSAdmins  group in Active Directory who can modify DNS records. While they are considered privileged users, there has been a lack of detailed explanations (apart CVE-2021-40469) on how this privilege could be abused.
 It's important to note that manipulating DNS entries is not limited to DNS Admins. There are other scenarios where this might be possible, such as having DNS Zones with insecure updates enabled (yes, this is not that uncommon!!) or gaining control over HOSTS file entries on client computers.<br>
-My goal was to test whether a Man-in-the-Middle (MitM) attack involving forwarding and Kerberos relaying could be successfully executed and abused after creating a spoofed DNS entry.
+My goal was to test whether a Man-in-the-Middle (MitM) attack involving forwarding and **Kerberos** relaying could be successfully executed and abused after creating a spoofed DNS entry.
 During my investigation, I discovered an existing tool, [krbjack](https://github.com/almandin/krbjack), which performs a similar attack by exploiting the *Insecure DNS Updates* flag. However, it was somewhat limited in scope.<br>
 I developed this tool, starting from  [KrbRelay](https://github.com/cube0x0/KrbRelay), using .NET 8.0, making it compatible with both Windows and GNU/Linux platforms.
 ## Overview
@@ -129,7 +129,8 @@ From here, we can:
 HTTP(s) ADCSRelay:
 ==================
 In this case the Zone MYLAB.LOCAL has been configured with Unsecure Update. Anonymous users with network access can modify DNS records!!<br><br>
-<img width="919" alt="image" src="https://github.com/user-attachments/assets/28b03fdb-81a2-41ea-8011-52d1ea445be0">
+![image](https://github.com/user-attachments/assets/920947a6-aae3-47bd-83d7-91c1d05150f4)
+
 <br><br>
 
 We intercept, relay, and forward the authenticated call to the HTTP ADCS server:<br><br>
