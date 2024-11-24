@@ -454,6 +454,20 @@ byte[] securityBlob = new byte[securityBufferLength];
                         spn = args[entry.index + 1];
                         break;
 
+                    case "-ENDPOINT":
+                    case "/ENDPOINT":
+                        try
+                        {
+                            if (args[entry.index + 1].StartsWith("/") || args[entry.index + 1].StartsWith("-"))
+                                throw new Exception();
+                            attacks.Add("endpoint", args[entry.index + 1]);
+                        }
+                        catch
+                        {
+                            Console.WriteLine("[-] -endpoint requires an argument");
+                            return;
+                        }
+                        break;
 
 
                     case "-RELAYEDUSER":

@@ -105,20 +105,19 @@ namespace KrbRelay.Clients
                     {
                         
                         string headerValue = header.Value.First().Replace("Negotiate ", "").Trim();
-                        
+
                         if (headerValue.Length < 1)
                         {
                             Console.WriteLine("[-] No WWW-Authenticate header returned, status code: {0}", result.StatusCode);
                             return;
                         }
-                        else if (Program.ntlm)
-                        {
-                            ntlm2 = Convert.FromBase64String(headerValue);
-                            Console.WriteLine("[*] ntlm2: {0}", Helpers.ByteArrayToString(ntlm2));
-                        }
+
                         else
                         {
-
+                            /*
+                            // MORE PROCESSING REQUIRED
+                            //DCOM
+                            
                             apRep1 = Convert.FromBase64String(headerValue);
                             Console.WriteLine("[*] Header: {0} ", header.Value);
                             
@@ -209,6 +208,7 @@ namespace KrbRelay.Clients
 
 
                             return;
+                        */
                         }
                         return;
                     }
