@@ -98,6 +98,8 @@ Examples:
     KrbRelay.exe -spn HTTP/target.domain.com -ssl -redirectserver  <ip_target_host> -redirectports 3389,5985,135,443,80
 ```
 # Examples
+SMB Relay:
+==========
 The user19 account is a member of the DNSAdmins group in the MYLAB.LOCAL domain and modifies the A record for SRV2-MYLAB. The IP 192.168.212.11 is our attacker machine.
 In this case, we use the dnstool.py script from from https://github.com/dirkjanm/krbrelayx<br><br>
 <img width="827" alt="image" src="https://github.com/user-attachments/assets/d66e4b5d-e1c6-472c-8b40-8951d969df3a">
@@ -110,7 +112,7 @@ A Domain Admin accesess the \\SRV2-MYLAB\c$ share without suspecting anything:
 <img width="851" alt="image" src="https://github.com/user-attachments/assets/052199fc-c0ba-4505-9125-90b5b2763f16">
 
 <br><br>
-We intercept, relay, and forward the authenticated call:<br><br>
+We intercept, relay, and forward the authenticated call to the SMB server:<br><br>
 <img width="814" alt="image" src="https://github.com/user-attachments/assets/8413f774-0bb4-4cbc-998e-3581b546717e">
 <br><br>
 Finally, we gain access to the share with privileged permissions:
@@ -124,6 +126,25 @@ From here, we can:
 - Create and start services that run under the LOCAL SYSTEM context.
  - And much more... 😉
 
+HTTP(s) ADCSRelay:
+==================
+In this case the Zone MYLAB.LOCAL has been configured with Unsecure Update. Anonymous users with network access can modify DNS records!!<br><br>
+<img width="919" alt="image" src="https://github.com/user-attachments/assets/28b03fdb-81a2-41ea-8011-52d1ea445be0">
+<br><br>
+
+We intercept, relay, and forward the authenticated call to the HTTP ADCS server:<br><br>
+<img width="965" alt="image" src="https://github.com/user-attachments/assets/1f859b23-1603-4eef-92b5-001b21e28624">
+
+<br><br>
+
+Administrator accesses a share of the ADCS Web Enrollment server:<br><br>
+<img width="554" alt="image" src="https://github.com/user-attachments/assets/1d07c7bc-0394-488d-a26f-51c4c926f1fe">
+<br><br>
+
+Finally, we ge a client authentication certificate on behalf the Administrator:<br><br>
+<img width="922" alt="image" src="https://github.com/user-attachments/assets/4a5795dc-4061-483e-be98-81ab5b89ef8e">
+<br><br>
+<br><br>
 
 # Acknowledgements
 Project Zero :
