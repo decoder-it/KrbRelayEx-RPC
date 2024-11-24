@@ -6,14 +6,20 @@ Created by [@decoder_it](https://github.com/decoder-it)
 
 ---
 
+## Why this tool
+I created this tool to explore and understand the offensive capabilities of DNSAdmins  group in Active Directory who can modify DNS records. While they are considered privileged users, there has been a lack of detailed explanations (apart CVE-2021-40469) on how this privilege could be abused.
+It's important to note that manipulating DNS entries is not limited to DNS Admins. There are other scenarios where this might be possible, such as having DNS Zones with insecure updates enabled (yes, this is not that uncommon!!) or gaining control over HOSTS file entries on client computers.<br>
+My goal was to test whether a Man-in-the-Middle (MitM) attack involving forwarding and Kerberos relaying could be successfully executed and abused after creating a spoofed DNS entry.
+During my investigation, I discovered an existing tool, [krbjack](https://github.com/almandin/krbjack), which performs a similar attack by exploiting the *Insecure DNS Updates* flag. However, it was somewhat limited in scope.<br>
+I developed this tool, starting from  [KrbRelay](https://github.com/cube0x0/KrbRelay), using .NET 8.0, making it compatible with both Windows and GNU/Linux platforms.
 ## Overview
 
-**KrbRelayEx** is a tool designed for performing Man-in-the-Middle (MitM) attacks by relaying Kerberos AP-REQ tickets. It listens for incoming SMB connections and forwards the AP-REQ to the target host, enabling access to SMB shares or HTTP AD CS (Active Directory Certificate Services) endpoints.  
+**KrbRelayEx** is a tool designed for performing Man-in-the-Middle (MitM) attacks by relaying Kerberos AP-REQ tickets. It listens for incoming SMB connections and forwards the AP-REQ to the target host, enabling access to SMB shares or HTTP AD CS (Active Directory Certificate Services) endpoints on behalf the targeted identity.  
 
 The tool can span several SMB consoles, and the relaying process is completely transparent to the end user, who will seamlessly access the desired share.  
 
 GitHub Repository: [https://github.com/decoder-it/KrbRelayEx](https://github.com/decoder-it/KrbRelayEx)  
-Credits: [cube0x0/KrbRelay](https://github.com/cube0x0/KrbRelay)
+
 
 ---
 
@@ -23,7 +29,7 @@ Credits: [cube0x0/KrbRelay](https://github.com/cube0x0/KrbRelay)
 - Interactive or background multithreaded SMB consoles for managing multiple connections, enabling file manipulation and creating/starting services
 - Multithreaded port forwarding to support other protocols.
 - Transparent relaying process for seamless user access.
-- Runs on Winodws and GNU/Linux with Dotnet 8.0 sdk
+- Runs on Winodws and GNU/Linux with .NET 8.0 sdk
 
 ## Notes
 
@@ -36,7 +42,7 @@ Credits: [cube0x0/KrbRelay](https://github.com/cube0x0/KrbRelay)
     - Having zones where unsecured DNS updates are allowed in Active Directory domains ==> This means that anonymous users with network access could potentially take over the domain!!!
     - Gaining control over HOSTS file entries on client computers.
   - Background consoles are ideal for managing multiple SMB consoles
-  - Similar tools https://github.com/almandin/krbjack
+  
 ## Usage
 
 ```
@@ -44,7 +50,6 @@ Credits: [cube0x0/KrbRelay](https://github.com/cube0x0/KrbRelay)
         # Kerberos Relay and Forwarder for (Fake) SMB MiTM Server     #
         # v1.0 2024                                                   #
         # Github: https://github.com/decoder-it/KrbRelayEx            #
-        # Credits: https://github.com/cube0x0/KrbRelay                #
         ###############################################################
 
 Description:
@@ -91,4 +96,14 @@ Examples:
 
   Relay attacks with SSL and port forwarding:
     KrbRelay.exe -spn HTTP/target.domain.com -ssl -redirectserver  <ip_target_host> -redirectports 3389,5985,135,443,80
+```
+# Acknowledgements
+Project Zero :
 
+https://googleprojectzero.blogspot.com/2021/10/using-kerberos-for-authentication-relay.html
+https://googleprojectzero.blogspot.com/2021/10/windows-exploitation-tricks-relaying.html
+
+KrbRelay:
+
+
+https://github.com/cube0x0/KrbRelay
