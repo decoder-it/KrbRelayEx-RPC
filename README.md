@@ -5,6 +5,10 @@ Kerberos Relay and Forwarder for (Fake) SMB MiTM Server
 ---
 KrbRelayEx is a tool designed for performing Man-in-the-Middle (MitM) attacks by relaying Kerberos AP-REQ tickets. It listens for incoming SMB connections and forwards the AP-REQ to the target host, enabling access to SMB shares or HTTP ADCS (Active Directory Certificate Services) endpoints on behalf of the targeted identity.
 
+## Disclaimer  
+
+**This tool is intended exclusively for legitimate testing and assessment purposes, such as penetration testing or security research, with proper authorization.**  
+Any misuse of this tool for unauthorized or malicious activities is strictly prohibited and beyond my responsibility as the creator. By using this tool, you agree to comply with all applicable laws and regulations.
 ## Why This Tool?  
 
 I created this tool to explore the potential misuse of privileges granted to the `DnsAdmins` group in Active Directory, focusing on their ability to modify DNS records. Members of this group are considered privileged users because they can make changes that impact how computers and services are located within a network. However, despite this level of access, there has been relatively little documentation (apart from CVE-2021-40469) explaining how these privileges might be exploited in practice.
@@ -26,7 +30,7 @@ Building upon the concept, I started from [KrbRelay](https://github.com/cube0x0/
 
 - Relay Kerberos AP-REQ tickets to access SMB shares or HTTP ADCS endpoints.  
 - Interactive or background **multithreaded SMB consoles** for managing multiple connections, enabling file manipulation and the creation/startup of services.  
-- **Multithreaded port forwarding** to forward additional trafficfrom clients to original destination such as RDP, HTTP(S), RPC Mapper, WinRM,...
+- **Multithreaded port forwarding** to forward additional traffic from clients to original destination such as RDP, HTTP(S), RPC Mapper, WinRM,...
 - Transparent relaying process for **seamless user access**.  
 - Cross-platform compatibility with Windows and GNU/Linux via .NET 8.0 SDK.  
 
@@ -86,8 +90,8 @@ Options:
 # Examples
 SMB Relay:
 ==========
-The user19 account is a member of the DNSAdmins group in the MYLAB.LOCAL domain and modifies the A record for SRV2-MYLAB. The IP 192.168.212.11 is our attacker machine.
-In this case, we use the dnstool.py script from from https://github.com/dirkjanm/krbrelayx<br><br>
+The *user19* account is a member of the DnsAdmins group in the MYLAB.LOCAL domain. As a member he can modify the A record for SRV2-MYLAB and change the IP 192.168.212.11 which is our attacker machine.
+Thee *dnstool.py* script from from https://github.com/dirkjanm/krbrelayx can be used for this purpose:<br><br>
 <img width="827" alt="image" src="https://github.com/user-attachments/assets/d66e4b5d-e1c6-472c-8b40-8951d969df3a">
 <br><br>
 On the attacker machine, we launch the relay/forwarder tool. SMB consoles will be launched in the background, starting from port 10000, and we will forward all traffic for WinRM, RPC Mapper, and Remote Desktop:<br><br>
@@ -114,7 +118,7 @@ From here, we can:
 
 HTTP(s) ADCSRelay:
 ==================
-In this case the Zone MYLAB.LOCAL has been configured with Unsecure Update. Anonymous users with network access can modify DNS records!!<br><br>
+In this case the Zone MYLAB.LOCAL has been configured with *Unsecure Updates*. Anonymous users with network access can modify DNS records!!<br><br>
 ![image](https://github.com/user-attachments/assets/920947a6-aae3-47bd-83d7-91c1d05150f4)
 
 <br><br>
