@@ -160,9 +160,9 @@ The tool has been build with .Net 8.0 Framework. The Dotnet Core runtime for Win
 - https://dotnet.microsoft.com/en-us/download/dotnet/8.0
 - On Ubuntu distros: sudo apt install dotnet8
 - Required files:
-  KrbRelayEx.dll
-  KrbRelayEx.runtimeconfig.json
-  KrbRelayEx.exe -> optional for Windows platforms
+  - KrbRelayEx.dll
+  - KrbRelayEx.runtimeconfig.json
+  - KrbRelayEx.exe -> optional for Windows platforms
   
 # Acknowledgements
 
