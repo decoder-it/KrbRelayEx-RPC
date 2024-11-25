@@ -24,7 +24,7 @@ Manipulating DNS entries isn’t exclusive to the `DnsAdmins` group. Other scena
 ### Tool Goals  
 The goal of this tool was to test whether a Man-in-the-Middle (MitM) attack could be executed by exploiting DNS spoofing, traffic forwarding, and Kerberos relaying. This is particularly relevant because **Kerberos authentication** is commonly used when a resource is accessed via its hostname or fully qualified domain name (FQDN), making it a cornerstone of many corporate networks.
 
-Building upon the concept, I started from [KrbRelay](https://github.com/cube0x0/KrbRelay) and developed this tool in .NET 8.0 to ensure compatibility across both Windows and GNU/Linux platforms.
+Building upon the concept, I started from the great [KrbRelay](https://github.com/cube0x0/KrbRelay) and developed this tool in .NET 8.0 to ensure compatibility across both Windows and GNU/Linux platforms.
 
 ---
 
