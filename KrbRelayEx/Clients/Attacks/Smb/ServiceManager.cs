@@ -203,7 +203,7 @@ namespace KrbRelay.Clients.Attacks.Smb
                     }
                 }
 
-                ScmrServiceHelper.rCloseServiceHandle(rpc, lpScHandsele, out status);
+                //ScmrServiceHelper.rCloseServiceHandle(rpc, lpScHandsele, out status);
                 ScmrServiceHelper.rCloseServiceHandle(rpc, newHandle, out status);
             }
         }

@@ -2,7 +2,7 @@
 //using KrbRelay.Com;
 using KrbRelay.HiveParser;
 using Microsoft.Win32;
-using NetFwTypeLib;
+//using NetFwTypeLib;
 using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Utilities;
 using SMBLibrary;
@@ -553,7 +553,7 @@ byte[] securityBlob = new byte[securityBufferLength];
             }
 
            
-             SMBtcpFwd = new FakeSMBServer(445, RedirectHost, 445, "SMB");
+             SMBtcpFwd = new FakeSMBServer(SmbListenerPort, RedirectHost, 445, "SMB");
             forwdardmode = false;
             SMBtcpFwd.Start(false);
            
