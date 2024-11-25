@@ -25,7 +25,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using static KrbRelay.Natives;
 
-using SMBLibrary.Client;
+
 using static System.Runtime.InteropServices.JavaScript.JSType;
 using KrbRelay.Clients.Attacks.Smb;
 namespace KrbRelay
@@ -39,7 +39,7 @@ namespace KrbRelay
     internal class Program
     {
 
-
+        public const string Version = "V1.0";
         public static string DcomHost = "";
         public static string RedirectHost = "";
         public static string FakeSPN = "";
@@ -232,7 +232,7 @@ byte[] securityBlob = new byte[securityBufferLength];
             Console.WriteLine("#                                                                              #");
             Console.WriteLine("#       Kerberos Relay and Forwarder for (Fake) SMB MiTM Server                #");
             Console.WriteLine("#                                                                              #");
-            Console.WriteLine("#                                v1.0 - 2024                                   #");
+            Console.WriteLine("#                                {0} - 2024                                   #", Version);
             Console.WriteLine("#                                                                              #");
             Console.WriteLine("#          Github: https://github.com/decoder-it/KrbRelayEx                    #");
             Console.WriteLine("#                                                                              #");
@@ -302,6 +302,8 @@ byte[] securityBlob = new byte[securityBufferLength];
             Console.WriteLine("    - Gaining control over HOSTS file entries on client computers.");
             Console.WriteLine();
             Console.WriteLine("  - Background consoles are ideal for managing multiple SMB consoles");
+            Console.WriteLine("");
+            Console.WriteLine("IMPORTANT: Ensure that you configure the entries in your hosts file to point to the actual target IP addresses!");
 
         }
 

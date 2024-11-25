@@ -20,7 +20,7 @@ parser.add_argument("--hostip", required=True, help="Specify the host's IP addre
 
 args = parser.parse_args()
 
-    # Access the arguments
+ 
 domain = args.domain
 dnsip = args.dnsip
 hostname = args.hostname
