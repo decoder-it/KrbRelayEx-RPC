@@ -171,20 +171,20 @@ namespace KrbRelay.Clients.Attacks.Smb
                 if (status != NTStatus.STATUS_SUCCESS)
                 {
                     //Console.WriteLine("[-] Could not bind to SCMR");
-                    return "[-] Could not bind to SCMR\n";
+                    return "[-] Could not bind to SCMR\r\n";
                 }
                 var lpScHandle = ScmrServiceHelper.rOpenSCManagerW(rpc, out status);
                 if (status != NTStatus.STATUS_SUCCESS)
                 {
                     //Console.WriteLine("[-] Failed to open SCMR handle: {0}", status);
-                    return String.Format("[-] Failed to open SCMR handle: {0}\n", status);
+                    return String.Format("[-] Failed to open SCMR handle: {0}\r\n", status);
                 }
                 var newHandle = ScmrServiceHelper.rOpenServiceW(rpc, lpScHandle, serviceName, out status);
                 
                 if (status != NTStatus.STATUS_SUCCESS)
                 {
                     //Console.WriteLine("[-] Failed to open service: {0}", status);
-                    return String.Format("[-] Failed to open service: {0}\n", status);
+                    return String.Format("[-] Failed to open service: {0}\r\n", status);
                 }
                 else
 
@@ -194,16 +194,17 @@ namespace KrbRelay.Clients.Attacks.Smb
                     if (status != NTStatus.STATUS_SUCCESS)
                     {
                         //Console.WriteLine("[-] Service failed to start: {0}", status);
-                        return String.Format("[-] Service failed to start: {0}\n", status);
+                        return String.Format("[-] Service failed to start: {0}\r\n", status);
                     }
                     else
                     {
                         //Console.WriteLine("[+] Service started {0}", serviceName);
-                        return String.Format("[+] Service started {0}\n", serviceName);
+                        return String.Format("[+] Service started {0}\r\n", serviceName);
                     }
                 }
 
                 //ScmrServiceHelper.rCloseServiceHandle(rpc, lpScHandsele, out status);
+
                 ScmrServiceHelper.rCloseServiceHandle(rpc, newHandle, out status);
             }
         }
