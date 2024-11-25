@@ -303,7 +303,7 @@ byte[] securityBlob = new byte[securityBufferLength];
             Console.WriteLine();
             Console.WriteLine("  - Background consoles are ideal for managing multiple SMB consoles");
             Console.WriteLine("");
-            Console.WriteLine("IMPORTANT: Ensure that you configure the entries in your hosts file to point to the actual target IP addresses!");
+            Console.WriteLine("** IMPORTANT: Ensure that you configure the entries in your hosts file to point to the actual target IP addresses!");
 
         }
 
