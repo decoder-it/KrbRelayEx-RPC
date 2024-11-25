@@ -159,6 +159,11 @@ On an ADCS server this would allow the backup of the the CA's private/public key
 The tool has been build with .Net 8.0 Framework. The Dotnet Core runtime for Windows and GNU/Linux can be downloaded here:
 - https://dotnet.microsoft.com/en-us/download/dotnet/8.0
 - On Ubuntu distros: sudo apt install dotnet8
+- Required files:
+  KrbRelayEx.dll
+  KrbRelayEx.runtimeconfig.json
+  KrbRelayEx.exe -> optional for Windows platforms
+  
 # Acknowledgements
 
 [Using Kerberos for Authentication Relay Attacks](https://googleprojectzero.blogspot.com/2021/10/using-kerberos-for-authentication-relay.html)
