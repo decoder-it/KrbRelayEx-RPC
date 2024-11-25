@@ -6,10 +6,17 @@ Kerberos Relay and Forwarder for (Fake) SMB MiTM Server
 ---
 
 ## Why this tool
-I developed this tool to explore and understand the offensive capabilities of the DNSAdmins group in Active Directory, specifically their ability to modify DNS records. While DNSAdmins are recognized as privileged users, there has been limited documentation (beyond CVE-2021-40469) on how these privileges can be exploited. It's worth noting that manipulating DNS entries is not exclusive to DNSAdmins. Scenarios like DNS zones with insecure updates enabled (a surprisingly common misconfiguration!) or controlling HOSTS file entries on client machines can also enable such attacks.
+I have created this tool to explore the potential misuse of privileges granted to the **DnsAdmins** group in Active Directory, focusing on their ability to modify DNS records. <br>
+Members of this group are considered privileged users because they can make changes that impact how computers and services are located within a network. <br>
+However, despite this level of access, there has been relatively little documentation (apart from CVE-2021-40469) explaining how these privileges might be exploited in practice.
+<br>
+It's worth noting that manipulating DNS entries is not exclusive to DnsAdmins. Scenarios like DNS zones with **Insecure Updates** enabled (a surprisingly common misconfiguration!) or controlling HOSTS file entries on client machines can also enable such attacks.<br>
 
-The primary goal of this project was to test whether a Man-in-the-Middle (MitM) attack, leveraging DNS spoofing, forwarding, and Kerberos relaying, could be executed and abused effectively. 
-Building upon this concept, I developed this tool, starting from [KrbRelay](https://github.com/cube0x0/KrbRelay), and implemented it in .NET 8.0 to ensure compatibility across both Windows and GNU/Linux platforms. 
+The goal of this tool was to test whether a Man-in-the-Middle (MitM) attack could be executed by exploiting DNS spoofing, traffic forwarding, and **Kerberos** relaying. This is especially relevant because **Kerberos** authentication is commonly used when a resource is accessed via its hostname or fully qualified domain name (FQDN), making it central to many corporate networks.
+
+Building upon this concept, I developed this tool, starting from [KrbRelay](https://github.com/cube0x0/KrbRelay), and implemented it in .NET 8.0 to ensure compatibility across both Windows and GNU/Linux platforms
+
+
 
 ## Overview
 
@@ -27,7 +34,7 @@ GitHub Repository: [https://github.com/decoder-it/KrbRelayEx](https://github.com
 - Relay Kerberos AP-REQ tickets to access SMB shares or HTTP ADCS endpoints.
 - Interactive or background multithreaded SMB consoles for managing multiple connections, enabling file manipulation and creating/starting services
 - Multithreaded port forwarding to support other protocols.
-- Transparent relaying process for seamless user access.
+- Transparent relaying process for **seamless user access**.
 - Runs on Winodws and GNU/Linux with .NET 8.0 sdk
 
 ## Notes
@@ -56,7 +63,7 @@ GitHub Repository: [https://github.com/decoder-it/KrbRelayEx](https://github.com
 Description:
   KrbRelayEx is a tool designed for performing Man-in-the-Middle (MitM) attacks and relaying Kerberos AP-REQ tickets.
   It listens for incoming SMB connections and forward the AP-REQ to the target host, enabling access to SMB shares or HTTP ADCS (Active Directory Certificate Services endpoints)
-  The tool can span several SMB consoles, and the relaying process is completely transparent to the end user, who will seamlessly access the desired share.
+  The tool can span several SMB consoles, and the relaying process is *completely transparent* to the end user, who will seamlessly access the desired share.
 
 Usage:
   KrbRelayEx.exe -spn <SPN> [OPTIONS] [ATTACK]
