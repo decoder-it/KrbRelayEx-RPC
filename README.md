@@ -41,6 +41,8 @@ GitHub Repository: [https://github.com/decoder-it/KrbRelayEx](https://github.com
     - Having zones where unsecured DNS updates are allowed in Active Directory domains ==> This means that anonymous users with network access could potentially take over the domain!!!
     - Gaining control over HOSTS file entries on client computers.
   - Background consoles are ideal for managing multiple SMB consoles
+    
+  - A similar tool based on python and impacket libs can be found here https://github.com/almandin/krbjack
   
 ## Usage
 
@@ -151,8 +153,8 @@ Or we could install a malicious service and get a shell running as SYSTEM
 
 <br><br>
 On an ADCS server this would allow the backup of the the CA's private/public key enabling the forging of certificates on behalf of any user.
-# Notes
-A similar tool can be found here https://github.com/almandin/krbjack
+
+
 # Acknowledgements
 
 [Using Kerberos for Authentication Relay Attacks](https://googleprojectzero.blogspot.com/2021/10/using-kerberos-for-authentication-relay.html)
