@@ -86,6 +86,8 @@ Options:
   -spn <SPN>                     Set the Service Principal Name (SPN) for the target service
   -redirectports <PORTS>         Comma-separated list of additional ports to forward (e.g., `3389,135,5985`)
   -smbport <PORT>                Specify the SMB port to listen on (default: 445)
+
+IMPORTANT: Ensure that you configure the entries in your hosts file to point to the actual target IP addresses!
 ```
 
 
