@@ -47,8 +47,6 @@ namespace KrbRelay
         public static int DcomListenerPort = 9999;
         public static string service = "";
         public static string[] RedirectPorts = null;
-        private static TcpListener server;
-        private static TcpClient myclient;
         public static byte[] AssocGroup = new byte[4];
         public static byte[] CallID = new byte[4];
         //public static TcpForwarder tcpFwd = new TcpForwarder();
@@ -212,21 +210,37 @@ byte[] securityBlob = new byte[securityBufferLength];
         public static CookieContainer CookieContainer = new CookieContainer();
 
         //hooked function
+        private static void PrintBanner()
+        {
+            Console.WriteLine("");
+            Console.WriteLine("██╗  ██╗██████╗ ██████╗ ██████╗ ███████╗██╗      █████╗ ██╗   ██╗███████╗██╗  ██╗");
+            Console.WriteLine("██║ ██╔╝██╔══██╗██╔══██╗██╔══██╗██╔════╝██║     ██╔══██╗╚██╗ ██╔╝██╔════╝╚██╗██╔╝");
+            Console.WriteLine("█████╔╝ ██████╔╝██████╔╝██████╔╝█████╗  ██║     ███████║ ╚████╔╝ █████╗   ╚███╔╝");
+            Console.WriteLine("██╔═██╗ ██╔══██╗██╔══██╗██╔══██╗██╔══╝  ██║     ██╔══██║  ╚██╔╝  ██╔══╝   ██╔██");
+            Console.WriteLine("██║  ██╗██║  ██║██████╔╝██║  ██║███████╗███████╗██║  ██║   ██║   ███████╗██╔╝ ██╗");
+            Console.WriteLine("╚═╝  ╚═╝╚═╝  ╚═╝╚═════╝ ╚═╝  ╚═╝╚══════╝╚══════╝╚═╝  ╚═╝   ╚═╝   ╚══════╝╚═╝  ╚═╝");
 
+        }
         private static void ShowHelp()
         {
 
-            
-            Console.WriteLine("\t#############      KrbRelayEx by @decoder_it     ##############");
-            Console.WriteLine("\t# Kerberos Relay and Forwarder for (Fake) SMB MiTM Server     #");
-            Console.WriteLine("\t# v1.0 2024                                                   #");
-            Console.WriteLine("\t# Github: https://github.com/decoder-it/KrbRelayEx            #");
-            Console.WriteLine("\t# Credits: https://github.com/cube0x0/KrbRelay                #");
-            Console.WriteLine("\t###############################################################");
 
+            PrintBanner();
+            Console.WriteLine("\r\r################################################################################");
+            Console.WriteLine("#                                                                              #");
+            Console.WriteLine("#                        KrbRelayEx by @decoder_it                             #");
+            Console.WriteLine("#                                                                              #");
+            Console.WriteLine("#       Kerberos Relay and Forwarder for (Fake) SMB MiTM Server                #");
+            Console.WriteLine("#                                                                              #");
+            Console.WriteLine("#                                v1.0 - 2024                                   #");
+            Console.WriteLine("#                                                                              #");
+            Console.WriteLine("#          Github: https://github.com/decoder-it/KrbRelayEx                    #");
+            Console.WriteLine("#                                                                              #");
+            Console.WriteLine("################################################################################");
 
             Console.WriteLine();
             Console.WriteLine("Description:");
+            
             Console.WriteLine("  KrbRelayEx is a tool designed for performing Man-in-the-Middle (MitM) attacks and relaying Kerberos AP-REQ tickets.");
             Console.WriteLine("  It listens for incoming SMB connections and forward the AP-REQ to the target host, enabling access to SMB shares or HTTP ADCS (Active Directory Certificate Services endpoints)");
             
@@ -298,13 +312,12 @@ byte[] securityBlob = new byte[securityBufferLength];
 
     public static void Main(string[] args)
         {
-            string clsid = "";
+            
 
-            int sessionID = -123;
-            string port = "9988";
+
             bool show_help = false;
-            bool llmnr = false;
-            Guid clsId_guid = new Guid();
+            
+            //Guid clsId_guid = new Guid();
 
             foreach (var entry in args.Select((value, index) => new { index, value }))
             {
@@ -520,9 +533,6 @@ byte[] securityBlob = new byte[securityBufferLength];
                 }
                 domainDN = domainDN.TrimStart(',');
             }
-
-            if (!string.IsNullOrEmpty(clsid))
-                clsId_guid = new Guid(clsid);
 
             //
             //setUserData(sessionID);
