@@ -9,8 +9,8 @@ Kerberos Relay and Forwarder for (Fake) RPC/DCOM MiTM Server
 ---
 KrbRelayEx-RPC is a tool similar to my <a href=https://github.com/decoder-it/KrbRelayEx>KrbRelayEx</a> designed for performing Man-in-the-Middle (MitM) attacks by relaying Kerberos AP-REQ tickets. <br><br>
 This version implements a fake RPC/DCOM server:<br>
-- Listens for authenticated ISystemActivator requests and extracts the AP-REQ tickets
-- Extracts dynamic port bindings from EPMAPPER/OXID resolutions
+- Listens for authenticated **ISystemActivator** requests and extracts the AP-REQ tickets
+- Extracts dynamic port bindings from **EPMAPPER/OXID** resolutions
 - Relay the AP-REQ to access SMB shares or HTTP ADCS (Active Directory Certificate Services) on behalf of the victim on the real destination host
 - Forwards the victim's requests dynamically and transparently to the real  destination and port so the  victim is unaware that their requests are being intercepted and relayed.
 
