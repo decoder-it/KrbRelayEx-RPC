@@ -68,6 +68,7 @@ namespace SMBLibrary
         STATUS_ACCOUNT_LOCKED_OUT = 0xC0000234,
         STATUS_PASSWORD_MUST_CHANGE = 0xC0000224,
         STATUS_NOT_A_REPARSE_POINT = 0xC0000275,
+        STATUS_BAD_IMPERSONATION_LEVEL = 0xC00000A5,
 
         STATUS_INVALID_SMB = 0x00010002,        // SMB1/CIFS: A corrupt or invalid SMB request was received
         STATUS_SMB_BAD_COMMAND = 0x00160002,    // SMB1/CIFS: An unknown SMB command code was received by the server
@@ -76,5 +77,6 @@ namespace SMBLibrary
         STATUS_OS2_INVALID_ACCESS = 0x000C0001, // SMB1/CIFS
         STATUS_OS2_NO_MORE_SIDS = 0x00710001,   // SMB1/CIFS
         STATUS_OS2_INVALID_LEVEL = 0x007C0001,  // SMB1/CIFS
+        STATUS_ERROR = 0x00FFFF
     }
 }

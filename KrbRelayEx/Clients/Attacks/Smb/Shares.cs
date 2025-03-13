@@ -247,7 +247,7 @@ namespace KrbRelay.Clients.Attacks.Smb
                                 break;
 
                             case "!l":
-                                Program.SMBtcpFwd.ListConnectedClients();
+                                //Program.SMBtcpFwd.ListConnectedClients();
                                 break;
 
 
@@ -667,7 +667,8 @@ namespace KrbRelay.Clients.Attacks.Smb
             }
             else
             {
-                Console.WriteLine("[-] Could not connect to {0}", share);
+                Console.WriteLine($"[-] Could not connect to {share} : {(status==NTStatus.STATUS_BAD_IMPERSONATION_LEVEL ? "STATUS_BAD_IMPERSONATION_LEVEL" : status)}");
+                
             }
             Console.WriteLine("[*] Exiting from  {0}", share);
         }

