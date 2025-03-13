@@ -11,7 +11,7 @@ KrbRelayEx-RPC is a tool similar to my <a href=https://github.com/decoder-it/Krb
 This version implements a fake RPC/DCOM server:<br>
 - Listens for authenticated **ISystemActivator** requests and extracts the AP-REQ tickets
 - Extracts dynamic port bindings from **EPMAPPER/OXID** resolutions
-- Relay the AP-REQ to access SMB shares or HTTP ADCS (Active Directory Certificate Services) on behalf of the victim on the real destination host
+- Relay the AP-REQ to access SMB shares or HTTP ADCS (Active Directory Certificate Services) on behalf of the victim on the real destination RPC/DCOM application
 - Forwards the victim's requests dynamically and transparently to the real  destination and port so the  victim is unaware that their requests are being intercepted and relayed.
 
 
