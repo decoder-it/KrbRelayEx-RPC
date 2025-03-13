@@ -20,28 +20,7 @@ namespace KrbRelay.Clients.Attacks.Smb
             object directoryHandle;
             FileStatus fileStatus;
             string newpath, filename = "*";
-            /*
-            if (path.EndsWith("\\"))
-            {
-                // Copy the string without the backslash into a new string
-                newpath = path.Substring(0, path.Length - 1);
-                filename = "*";
-
-            }
-            else
-            {
-                // Find the last occurrence of \
-                int lastIndex = path.LastIndexOf("\\");
-
-                // Copy the string until \
-                newpath = path.Substring(0, lastIndex);
-
-
-                // Copy the string after \
-                filename = path.Substring(lastIndex + 1);
-
-            }*/
-            var status = fileStore.CreateFile(out directoryHandle, out fileStatus, path, AccessMask.GENERIC_READ, SMBLibrary.FileAttributes.Directory, ShareAccess.Read | ShareAccess.Write, CreateDisposition.FILE_OPEN, CreateOptions.FILE_DIRECTORY_FILE, null);
+                        var status = fileStore.CreateFile(out directoryHandle, out fileStatus, path, AccessMask.GENERIC_READ, SMBLibrary.FileAttributes.Directory, ShareAccess.Read | ShareAccess.Write, CreateDisposition.FILE_OPEN, CreateOptions.FILE_DIRECTORY_FILE, null);
             if (status == NTStatus.STATUS_SUCCESS)
             {
                 List<QueryDirectoryFileInformation> queryDirectoryFileInformation;
@@ -356,27 +335,7 @@ namespace KrbRelay.Clients.Attacks.Smb
             object directoryHandle;
             FileStatus fileStatus;
             string newpath, filename = "*";
-            /*
-            if (path.EndsWith("\\"))
-            {
-                // Copy the string without the backslash into a new string
-                newpath = path.Substring(0, path.Length - 1);
-                filename = "*";
-
-            }
-            else
-            {
-                // Find the last occurrence of \
-                int lastIndex = path.LastIndexOf("\\");
-
-                // Copy the string until \
-                newpath = path.Substring(0, lastIndex);
-
-
-                // Copy the string after \
-                filename = path.Substring(lastIndex + 1);
-
-            }*/
+            
             var status = fileStore.CreateFile(out directoryHandle, out fileStatus, path, AccessMask.GENERIC_READ, SMBLibrary.FileAttributes.Directory, ShareAccess.Read | ShareAccess.Write, CreateDisposition.FILE_OPEN, CreateOptions.FILE_DIRECTORY_FILE, null);
             if (status == NTStatus.STATUS_SUCCESS)
             {

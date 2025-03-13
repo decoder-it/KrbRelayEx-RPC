@@ -60,10 +60,7 @@ public class FakeRPCServer
 
     public FakeRPCServer(int listenPort, string targetHost, int targetPort)
     {
-        /*_listenerSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-        _listenerSocket.Bind(new IPEndPoint(IPAddress.Any, listenPort));
-        _listenerSocket.Listen(100); // Allow up to 100 pending connections
-        _targetEndpoint = new IPEndPoint(Dns.GetHostEntry(targetHost).AddressList[0], targetPort);*/
+        
         _listenPort = listenPort;
         _targetHost = targetHost;
         _targetPort = targetPort;
@@ -71,10 +68,7 @@ public class FakeRPCServer
     }
     public FakeRPCServer(int listenPort, string targetHost, int targetPort, string stype)
     {
-        /*_listenerSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-        _listenerSocket.Bind(new IPEndPoint(IPAddress.Any, listenPort));
-        _listenerSocket.Listen(100); // Allow up to 100 pending connections
-        _targetEndpoint = new IPEndPoint(Dns.GetHostEntry(targetHost).AddressList[0], targetPort);*/
+        
         _listenPort = listenPort;
         _targetHost = targetHost;
         _targetPort = targetPort;
@@ -99,13 +93,13 @@ public class FakeRPCServer
     {
         if (_isRunning)
         {
-           // Console.WriteLine("[*] Stopping FakeRPCServer on port:{0}", _listenPort);
+        
             _isRunning = false;
 
-            // Stop listening for new connections
+        
             _listenerSocket.Close();
 
-            // Close all active connections
+        
             foreach (var kvp in _activeConnections)
             {
                 CloseConnection(kvp.Value);
@@ -113,7 +107,7 @@ public class FakeRPCServer
 
             _activeConnections.Clear();
 
-            //Console.WriteLine("[*] FakeRPCServer {0} stopped.", _listenPort);
+        
         }
     }
 
@@ -134,27 +128,27 @@ public class FakeRPCServer
             Socket clientSocket = _listenerSocket.EndAccept(ar);
 
             _listenerSocket.BeginAccept(OnClientConnect, null);
-            // Create a unique key for this connection
+        
             string clientKey = $"{clientSocket.RemoteEndPoint}-{Guid.NewGuid()}";
 
             Console.WriteLine($"[*] FakeRPCServer[{_listenPort}]: Client connected [{clientSocket.RemoteEndPoint}] in {(Program.forwdardmode ? "FORWARD" : "RELAY")} mode", _listenPort);
 
-            // Create a new connection to the target server
+        
             Socket targetSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             targetSocket.Connect(_targetEndpoint);
 
-            // Create state objects for bidirectional forwarding
+        
             var clientToTargetState = new State(clientSocket, targetSocket);
             var targetToClientState = new State(targetSocket, clientSocket);
 
-            // Add the connection to the dictionary
+        
             _activeConnections[clientKey] = clientToTargetState;
 
-            // Start forwarding data in both directions
+        
             clientSocket.BeginReceive(clientToTargetState.Buffer, 0, clientToTargetState.Buffer.Length, SocketFlags.None, OnDataFromClient, clientToTargetState);
             targetSocket.BeginReceive(targetToClientState.Buffer, 0, targetToClientState.Buffer.Length, SocketFlags.None, OnDataFromTarget, targetToClientState);
 
-            // Continue accepting new connections
+
 
         }
         catch (Exception ex)
@@ -167,10 +161,6 @@ public class FakeRPCServer
         state = (State)ar.AsyncState;
         byte[] buffer = new byte[4096];
         
-        //if (state.isRelayed)
-        //  return;
-        //try
-        //{
         
         try
         {
@@ -179,7 +169,7 @@ public class FakeRPCServer
 
             if (bytesRead > 0)
             {
-                // Forward data to the target
+
                 state.numReads++;
                 byte[] b = new byte[2];
                 b[0] = state.Buffer[22];
@@ -194,7 +184,7 @@ public class FakeRPCServer
                     
 
 
-                    if (/*Opnum == OPNUM_REMOTE_CREATE_INSTANCE &&*/ state.Buffer[2] == PACKET_TYPE_REQUEST)
+                    if (state.Buffer[2] == PACKET_TYPE_REQUEST)
                     {
                         CallID[0] = state.Buffer[12];
                         
@@ -357,10 +347,7 @@ public class FakeRPCServer
                 if (state.Buffer[2] == PACKET_TYPE_RESPONSE && state.Buffer[12] == CallID[0] && _listenPort == Program.RPCListnerPort)
                 {
                     string securityBinding = Encoding.Unicode.GetString(state.Buffer).TrimEnd('\0');
-                    //ISystemActivatorOffset = 0;
-                    //Console.WriteLine("[/] ISystemActivatorOffset {0} ", ISystemActivatorOffset);
-
-                    // Step 2: Extract the port using a regular expression
+                    
                     string port = Program.ExtractPortFromBinding(securityBinding);
                     if (port != null)
                     {
@@ -385,8 +372,6 @@ public class FakeRPCServer
                         
                         if (p >0)
                         {
-                            /*   PortForwarder RPCtcpFwd = new PortForwarder(p, Program.RedirectHost, p);
-                               RPCtcpFwd.StartAsync();*/
                             if(false /*!Program.forwdardmode*/)
                             {
                                 Console.WriteLine("[-] FakeRPCServer {0} Port not found in the binding string maybe {1:X}{2:X} {3} {4} starting a new one ",_listenPort, b[0], b[1], p, state.Buffer.Length);
