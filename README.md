@@ -76,7 +76,7 @@ Description:
   It listens for incoming authenticated ISystemActivator requests, extracts dynamic port bindings from EPMAPPER/OXID resolutions,
   captures the AP-REQ for accessing SMB shares or HTTP ADCS (Active Directory Certificate Services endpoints), then dynamically
   and transparently forwards the victim's requests to the real destination host and port
-  The tool can span several SMB consoles, and the relaying process is completely transparent to the end user, who will seamlessly access the desired RPC/DCOM appliaction
+  The tool can span several SMB consoles, and the relaying process is completely transparent to the end user, who will seamlessly access the desired RPC/DCOM application
 
 Usage:
   KrbRelayEx.exe -spn <SPN> [OPTIONS] [ATTACK]
