@@ -349,10 +349,10 @@ namespace SMBLibrary.Client
                     int outlen = 0;
                     //Console.WriteLine("[/] Offsets: {0} {1}", currSocketServer.IOXidResolverOffset, currSocketServer.ISystemActivatorOffset);
                     byte[] head;
-                    if (currSocketServer.IOXidResolverOffset > 0)
+                    if (false /*currSocketServer.IOXidResolverOffset> 1*/)
 
                     {
-                        //Console.WriteLine("[*] SmbClient STATUS_MORE_PROCESSING_REQUIRED  for OXID");
+                        Console.WriteLine("[*] SmbClient STATUS_MORE_PROCESSING_REQUIRED  for OXID");
                         moreArray = new byte[moreArray2.Length];
                         Array.Copy(moreArray2, moreArray, moreArray2.Length);
                                               
