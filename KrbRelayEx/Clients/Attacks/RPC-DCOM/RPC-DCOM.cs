@@ -19,6 +19,7 @@ using System.Collections;
 using System.Threading;
 using Org.BouncyCastle.Asn1.Ocsp;
 using SMBLibrary.Services;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 /// <summary>
 
 
@@ -46,7 +47,7 @@ public class FakeRPCServer
     public int IOXidResolverOffset = -1;
     public int EPMOffset = -1;
     public byte[] AssocGroup = new byte[4];
-    public byte[] ServerAliveResp = new byte[]
+    /*public byte[] ServerAliveResp = new byte[]
     {
         0x05, 0x00, 0x02, 0x03, 0x10, 0x00, 0x00, 0x00, 0x98, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x80, 0x00, 0x00, 0x00, 0x00,
         0x00, 0x00, 0x00, 0x05, 0x00, 0x07, 0x00, 0x00, 0x00, 0x02, 0x00, 0x33, 0x00, 0x00, 0x00, 0x33, 0x00, 0x1D, 0x00, 0x07, 0x00,
@@ -56,7 +57,7 @@ public class FakeRPCServer
         0x00, 0xFF, 0xFF, 0x00, 0x00, 0x10, 0x00, 0xFF, 0xFF, 0x00, 0x00, 0x0A, 0x00, 0xFF, 0xFF, 0x00, 0x00, 0x16, 0x00, 0xFF, 0xFF,
         0x00, 0x00, 0x1F, 0x00, 0xFF, 0xFF, 0x00, 0x00, 0x0E, 0x00, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
         0x00, 0x00, 0x00, 0x00, 0x00
-    };
+    };*/
 
     public FakeRPCServer(int listenPort, string targetHost, int targetPort)
     {
@@ -124,13 +125,22 @@ public class FakeRPCServer
     {
         try
         {
-            
+
             Socket clientSocket = _listenerSocket.EndAccept(ar);
 
             _listenerSocket.BeginAccept(OnClientConnect, null);
-        
-            string clientKey = $"{clientSocket.RemoteEndPoint}-{Guid.NewGuid()}";
 
+            string clientKey = $"{clientSocket.RemoteEndPoint}-{Guid.NewGuid()}";
+            if (Program.SourceHosts != null)
+                {
+                if (!Program.SourceHosts.Any(item => item == clientSocket.RemoteEndPoint.ToString().Split(':')[0]))
+                    { 
+                        Console.WriteLine($"SHost: {Program.SourceHosts[0].ToString()} {clientSocket.RemoteEndPoint.ToString()}");
+                        Program.forwdardmode = true;
+
+                    }
+                
+                }
             Console.WriteLine($"[*] FakeRPCServer[{_listenPort}]: Client connected [{clientSocket.RemoteEndPoint}] in {(Program.forwdardmode ? "FORWARD" : "RELAY")} mode", _listenPort);
 
         

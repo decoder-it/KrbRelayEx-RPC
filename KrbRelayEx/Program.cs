@@ -43,7 +43,7 @@ namespace KrbRelay
     internal class Program
     {
 
-        public const string Version = "V1.0";
+        public const string Version = "V1.1";
         public static string DcomHost = "";
         public static string RedirectHost = "";
         public static string FakeSPN = "";
@@ -52,6 +52,7 @@ namespace KrbRelay
         public static int DcomListenerPort = 9999;
         public static string service = "";
         public static string[] RedirectPorts = null;
+        public static string[]SourceHosts = null;
         public static TcpClient myclient;
         public static byte[] AssocGroup = new byte[4];
         public static byte[] CallID = new byte[4];
@@ -310,7 +311,8 @@ byte[] securityBlob = new byte[securityBufferLength];
                 Console.WriteLine("  -ssl                           Use SSL transport for secure communication");
                 Console.WriteLine("  -redirectports <PORTS>         Provide a comma-separated list of additional ports to forward to the target (e.g., '3389,445,5985')");
                 Console.WriteLine("  -rpcport <PORT>                Specify the RPC port to listen on (default: 135)");
-                Console.WriteLine();
+                Console.WriteLine("  -sourcehosts <hosts>           Provide a comma-separated list of source hosts to relay, forward for all others (e.g., '10.0.0.1,10.0.0.2')\"");
+            Console.WriteLine();
 
                 Console.WriteLine("Examples:");
                 Console.WriteLine("  Start an interactive SMB console:");
@@ -383,6 +385,10 @@ byte[] securityBlob = new byte[securityBufferLength];
                     case "-REDIRECTHOST":
                     case "/REDIRECTHOST":
                         RedirectHost = args[entry.index + 1];
+                        break;
+                    case "-SOURCEHOSTS":
+                    case "-/SOURCEHOSTS":
+                        SourceHosts= args[entry.index + 1].Split(',');
                         break;
                     case "-REDIRECTPORTS":
                     case "/REDIRECTPORTS":
